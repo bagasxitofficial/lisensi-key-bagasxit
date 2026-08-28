@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>🔥 Daftar Kunci FF</title>
+  <style>
+    body { background: #0b0b0b; color: #fff; font-family: monospace; padding: 20px; }
+    .key-box { background: #1a1a1a; border: 1px solid #ff4444; padding: 10px; margin: 8px 0; border-radius: 6px; }
+    .expired { opacity: 0.4; border-color: #666; }
+    .badge { color: #ff4444; font-weight: bold; }
+  </style>
+</head>
+<body>
+<h1>💀 KUNCI MOD MENU FF</h1>
+<div id="list"></div>
+
+<script>
+  // GANTI URL INI PAKAI PUNYA LO
+  const firebaseUrl = 'https://bagasxit-official-default-rtdb.firebaseio.com/keys.json';
+
+  async function loadKeys() {
+    try {
+      const res = await fetch(firebaseUrl);
+      const data = await res.json();
+      const container = document.getElementById('list');
+      container.innerHTML = '';
+
+      if (!data) {
+        container.innerHTML = '<p>Belum ada kunci.</p>';
+        return;
+      }
+
+      const now = Math.floor(Date.now() / 1000);
+      for (let [id, keyData] of Object.entries(data)) {
+        // Ambil expiry dalam detik (karena Sketchware lo pake millisecond, bagi 1000)
+        const expirySeconds = Math.floor(keyData.expires_at / 1000);
+        const isExpired = expirySeconds < now;
+        const active = keyData.is_active && !isExpired;
+        
+        const div = document.createElement('div');
+        div.className = 'key-box' + (isExpired ? ' expired' : '');
+        div.innerHTML = `
+          <strong>${id}</strong>
+          <span class="badge">${active ? '✅ AKTIF' : '❌ KADALUARSA'}</span><br>
+          <small>Berlaku sampai: ${new Date(expirySeconds * 1000).toLocaleString()}</small>
+        `;
+        container.appendChild(div);
+      }
+    } catch (e) {
+      document.getElementById('list').innerHTML = 'Error: ' + e.message;
+    }
+  }
+
+  loadKeys();
+  setInterval(loadKeys, 30000);
+</script>
+</body>
+</html>
