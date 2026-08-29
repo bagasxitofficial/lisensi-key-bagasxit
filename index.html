@@ -158,7 +158,7 @@
     <input type="text" id="newAdminUser" placeholder="Username" />
     <input type="password" id="newAdminPass" placeholder="Password" />
     <div class="btn-group-modal">
-      <button class="btn btn-primary" id="confirmAddAdmin">SIMPAN</button>
+      <button class="btn btn-primary" id="confirmAddAdminBtn">SIMPAN</button>
       <button class="btn btn-secondary" id="cancelAddAdmin">BATAL</button>
     </div>
     <div id="addAdminError" style="color:#EF4444; font-size:13px; margin-top:10px; display:none;"></div>
@@ -172,7 +172,7 @@
   var FIREBASE_URL = 'https://bagasxit-official-default-rtdb.firebaseio.com/keys.json';
   var ADMIN_DB_URL = 'https://bagasxit-official-default-rtdb.firebaseio.com/admins.json';
 
-  // MASUKKAN LINK HASIL MOVE2LINK KAMU DI BAWAH INI (Ganti link contoh di bawah):
+  // UBAH LINK MOVE2LINK KAMU DI SINI:
   var BASE_SHORTLINK = 'https://move2link.com/xxxxx'; 
   
   var VALID_PASSKEY = 'BAGASXIT2026';
@@ -210,7 +210,7 @@
   var addAdminModal = document.getElementById('addAdminModal');
   var newAdminUser = document.getElementById('newAdminUser');
   var newAdminPass = document.getElementById('newAdminPass');
-  var confirmAddAdmin = document.getElementById('confirmAddAdmin');
+  var confirmAddAdminBtn = document.getElementById('confirmAddAdminBtn');
   var cancelAddAdmin = document.getElementById('cancelAddAdmin');
   var addAdminError = document.getElementById('addAdminError');
 
@@ -243,7 +243,7 @@
     var pass = urlParams.get('pass');
 
     if (pass === VALID_PASSKEY) {
-      showMessage('🎉 Berhasil melewati Shortlink! Menyiapkan Key...', 'success');
+      showMessage('🎉 Berhasil mengenali Passkey! Menyiapkan Key...', 'success');
       loadKeysAndShow(true);
     } else {
       keyDisplay.textContent = 'LOCKED 🔒';
@@ -251,11 +251,17 @@
       keyStatus.textContent = '🔒 LOCKED';
       keyStatus.className = 'key-status expired';
       copyBtn.style.display = 'none';
+      loadKeysAndShow(false);
     }
   }
 
+  function isKeyActive(k) {
+    if (!k) return false;
+    if (k.status === 'ACTIVE' || k.is_active === true) return true;
+    return false;
+  }
+
   function loadKeysAndShow(isUnlocked) {
-    hideMessage();
     fetch(FIREBASE_URL)
       .then(function(response) {
         if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -272,9 +278,8 @@
         });
         keyCount.textContent = allKeys.length + ' keys';
 
-        var now = Date.now();
         var activeKeys = allKeys.filter(function(k) {
-          return k.is_active === true && k.expires_at > now;
+          return isKeyActive(k);
         });
 
         if (activeKeys.length === 0) {
@@ -305,25 +310,16 @@
 
   function renderKey(keyData) {
     if (!keyData) { showEmptyState(); return; }
-    var now = Date.now();
-    var expiry = keyData.expires_at || 0;
-    var isActive = keyData.is_active === true && expiry > now;
+    
+    keyDisplay.textContent = keyData.key || keyData.id || '—';
 
-    keyDisplay.textContent = keyData.id || '—';
-
-    if (expiry > 0) {
-      var date = new Date(expiry);
-      var diff = Math.floor((expiry - now) / 1000 / 60 / 60);
-      if (diff > 0) {
-        keyExpiry.innerHTML = '⏳ <strong>' + diff + 'h</strong> remaining · expires ' + date.toLocaleString();
-      } else {
-        keyExpiry.innerHTML = '⏰ <strong>EXPIRED</strong> · was ' + date.toLocaleString();
-      }
+    if (keyData.expires_at_str || keyData.expires) {
+      keyExpiry.innerHTML = '⏳ Expires: <strong>' + (keyData.expires_at_str || keyData.expires) + '</strong>';
     } else {
-      keyExpiry.innerHTML = '⏳ <strong>No expiry</strong>';
+      keyExpiry.innerHTML = '⏳ <strong>Active Key</strong>';
     }
 
-    if (isActive) {
+    if (isKeyActive(keyData)) {
       keyStatus.textContent = '✅ ACTIVE';
       keyStatus.className = 'key-status';
     } else {
@@ -351,7 +347,7 @@
       alert('Selesaikan Shortlink terlebih dahulu!'); 
       return; 
     }
-    var text = currentKey.id || '';
+    var text = keyDisplay.textContent || '';
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(function() {
         var orig = copyBtn.textContent;
@@ -375,11 +371,13 @@
   }
 
   // ==============================================
-  // OPEN SHORTLINK METHOD
+  // OPEN SHORTLINK METHOD (CARA 1: DYNAMIC SESSION)
   // ==============================================
   function openShortlink() {
-    var uniqueId = Date.now() + '_' + Math.floor(Math.random() * 1000);
-    var dynamicUrl = BASE_SHORTLINK + '?v=' + uniqueId;
+    var uniqueId = Date.now() + '_' + Math.floor(Math.random() * 9000 + 1000);
+    var separator = BASE_SHORTLINK.includes('?') ? '&' : '?';
+    var dynamicUrl = BASE_SHORTLINK + separator + 'ref_session=' + uniqueId;
+    
     window.open(dynamicUrl, '_blank');
   }
 
@@ -425,11 +423,7 @@
           loadKeysAndShow(true);
           loadAdminList();
 
-          if (currentAdmin.isMaster === true) {
-            addAdminBtn.style.display = 'inline-block';
-          } else {
-            addAdminBtn.style.display = 'none';
-          }
+          addAdminBtn.style.display = 'inline-block';
         } else {
           loginError.textContent = '❌ Username atau password salah!';
           loginError.style.display = 'block';
@@ -460,8 +454,7 @@
       var adm = adminList[i];
       var isMaster = adm.isMaster === true;
       var masterBadge = isMaster ? '<span class="master-badge">MASTER</span>' : '';
-      var canDelete = (currentAdmin && currentAdmin.isMaster === true && !isMaster);
-      var deleteBtn = canDelete ? '<button class="remove-btn" data-id="' + adm.id + '" data-username="' + adm.username + '">🗑️</button>' : '';
+      var deleteBtn = '<button class="remove-btn" data-id="' + adm.id + '" data-username="' + adm.username + '">🗑️</button>';
       html += '<div class="admin-item">' +
         '<span class="username">' + adm.username + ' ' + masterBadge + '</span>' +
         deleteBtn +
@@ -493,7 +486,7 @@
     addAdminModal.style.display = 'none';
   }
 
-  function confirmAddAdmin() {
+  function processAddAdmin() {
     var user = newAdminUser.value.trim();
     var pass = newAdminPass.value.trim();
     if (!user || !pass) {
@@ -512,6 +505,9 @@
           hideAddAdminModal();
           showMessage('✅ Admin baru berhasil ditambahkan!', 'success');
           loadAdminList();
+        } else {
+          addAdminError.textContent = 'Gagal menambah admin! (Error: ' + res.status + ')';
+          addAdminError.style.display = 'block';
         }
       });
   }
@@ -534,28 +530,17 @@
       return;
     }
 
-    var now = Date.now();
     var html = '';
     for (var i = 0; i < allKeys.length; i++) {
       var k = allKeys[i];
-      var expiry = k.expires_at || 0;
-      var statusText = '';
-      var statusClass = '';
-      if (k.is_active !== true) {
-        statusText = 'INACTIVE';
-        statusClass = 'inactive';
-      } else if (expiry > now) {
-        statusText = 'ACTIVE';
-        statusClass = '';
-      } else {
-        statusText = 'EXPIRED';
-        statusClass = 'expired';
-      }
-      var expiryDate = expiry > 0 ? new Date(expiry).toLocaleString() : '—';
-      var hwid = k.hwid && k.hwid.length > 0 ? k.hwid : 'Belum Terikat (Kosong)';
+      var statusTextStr = isKeyActive(k) ? 'ACTIVE' : 'INACTIVE';
+      var statusClassStr = isKeyActive(k) ? '' : 'inactive';
+
+      var expiryDate = k.expires_at_str || k.expires || (k.expires_at ? new Date(k.expires_at).toLocaleString() : '—');
+      var hwid = (k.hwid && k.hwid.length > 0) ? k.hwid : 'Belum Terikat (Kosong)';
       html += '<tr>' +
-        '<td><strong>' + k.id + '</strong></td>' +
-        '<td><span class="status-badge ' + statusClass + '">' + statusText + '</span></td>' +
+        '<td><strong>' + (k.key || k.id) + '</strong></td>' +
+        '<td><span class="status-badge ' + statusClassStr + '">' + statusTextStr + '</span></td>' +
         '<td>' + expiryDate + '</td>' +
         '<td style="font-size:11px;color:#8E8AA7;">' + hwid + '</td>' +
         '</tr>';
@@ -608,7 +593,7 @@
 
   addAdminBtn.addEventListener('click', showAddAdminModal);
   cancelAddAdmin.addEventListener('click', hideAddAdminModal);
-  confirmAddAdmin.addEventListener('click', confirmAddAdmin);
+  confirmAddAdminBtn.addEventListener('click', processAddAdmin);
 
   // EXECUTE ON START
   checkShortlinkPasskey();
