@@ -172,9 +172,10 @@
   var FIREBASE_URL = 'https://bagasxit-official-default-rtdb.firebaseio.com/keys.json';
   var ADMIN_DB_URL = 'https://bagasxit-official-default-rtdb.firebaseio.com/admins.json';
 
-  // LINK SHORTLINK KAMU (Ganti dengan link shortlink kamu asli, sertakan ?pass=BAGASXIT2026 di target akhir shortlink)
-  var SHORTLINK_URL = 'https://example-shortlink.com/your-id'; 
-  var VALID_PASSKEY = 'BAGASXIT2026'; // Token pembuka key (bisa diubah)
+  // MASUKKAN LINK HASIL MOVE2LINK KAMU DI BAWAH INI (Ganti link contoh di bawah):
+  var BASE_SHORTLINK = 'https://move2link.com/xxxxx'; 
+  
+  var VALID_PASSKEY = 'BAGASXIT2026';
 
   // ==============================================
   // DOM REFS
@@ -219,9 +220,6 @@
   var adminList = [];
   var currentAdmin = null;
 
-  // ==============================================
-  // UTILITY FUNCTIONS
-  // ==============================================
   function showMessage(msg, type) {
     if (!type) type = 'info';
     messageBox.textContent = msg;
@@ -238,7 +236,7 @@
   }
 
   // ==============================================
-  // PUBLIC: VERIFIKASI TOKEN UTAMA DARI SHORTLINK
+  // PUBLIC: CHECK PASSKEY
   // ==============================================
   function checkShortlinkPasskey() {
     var urlParams = new URLSearchParams(window.location.search);
@@ -246,9 +244,8 @@
 
     if (pass === VALID_PASSKEY) {
       showMessage('🎉 Berhasil melewati Shortlink! Menyiapkan Key...', 'success');
-      loadKeysAndShow(true); // Izinkan menampilkan key
+      loadKeysAndShow(true);
     } else {
-      // Belum lewati shortlink
       keyDisplay.textContent = 'LOCKED 🔒';
       keyExpiry.innerHTML = '⏳ Klik <strong>GET KEY</strong> untuk lewati Shortlink.';
       keyStatus.textContent = '🔒 LOCKED';
@@ -273,7 +270,7 @@
         allKeys = Object.keys(data).map(function(k) {
           return { id: k, ...data[k] };
         });
-        keyCount.textContent = allKeys.length;
+        keyCount.textContent = allKeys.length + ' keys';
 
         var now = Date.now();
         var activeKeys = allKeys.filter(function(k) {
@@ -306,9 +303,6 @@
       });
   }
 
-  // ==============================================
-  // PUBLIC: RENDER KEY
-  // ==============================================
   function renderKey(keyData) {
     if (!keyData) { showEmptyState(); return; }
     var now = Date.now();
@@ -352,9 +346,6 @@
     keyStatus.className = 'key-status expired';
   }
 
-  // ==============================================
-  // COPY
-  // ==============================================
   function copyKey() {
     if (!currentKey || keyDisplay.textContent.includes('LOCKED')) { 
       alert('Selesaikan Shortlink terlebih dahulu!'); 
@@ -384,7 +375,16 @@
   }
 
   // ==============================================
-  // ADMIN: LOGIN
+  // OPEN SHORTLINK METHOD
+  // ==============================================
+  function openShortlink() {
+    var uniqueId = Date.now() + '_' + Math.floor(Math.random() * 1000);
+    var dynamicUrl = BASE_SHORTLINK + '?v=' + uniqueId;
+    window.open(dynamicUrl, '_blank');
+  }
+
+  // ==============================================
+  // ADMIN LOGIN & MANAGEMENT
   // ==============================================
   function handleLogin() {
     var user = loginUser.value.trim();
@@ -587,12 +587,10 @@
   }
 
   // ==============================================
-  // EVENTS
+  // LISTENERS
   // ==============================================
   copyBtn.addEventListener('click', copyKey);
-  shortlinkBtn.addEventListener('click', function() {
-    window.location.href = SHORTLINK_URL;
-  });
+  shortlinkBtn.addEventListener('click', openShortlink);
   adminBtn.addEventListener('click', function() {
     publicView.style.display = 'none';
     loginView.style.display = 'block';
@@ -612,7 +610,7 @@
   cancelAddAdmin.addEventListener('click', hideAddAdminModal);
   confirmAddAdmin.addEventListener('click', confirmAddAdmin);
 
-  // START
+  // EXECUTE ON START
   checkShortlinkPasskey();
 </script>
 </body>
