@@ -167,13 +167,19 @@
 
 <script>
   // ==============================================
-  // KONFIGURASI FIREBASE & SHORTLINK
+  // KONFIGURASI FIREBASE & MULTI-SHORTLINK MOVE2LINK
   // ==============================================
   var FIREBASE_URL = 'https://bagasxit-official-default-rtdb.firebaseio.com/keys.json';
   var ADMIN_DB_URL = 'https://bagasxit-official-default-rtdb.firebaseio.com/admins.json';
 
-  // UBAH LINK MOVE2LINK KAMU DI SINI:
-  var BASE_SHORTLINK = 'https://move2link.com/xxxxx'; 
+  // MASUKKAN DAFTAR SHORTLINK MOVE2LINK KAMU DI SINI (3-5 LINK):
+  // Pastikan semua link Move2Link ini dibuat dengan Target URL:
+  // https://bagasxitofficial.github.io/lisensi-key-bagasxit/?pass=BAGASXIT2026
+  var MOVE2LINK_LIST = [
+    'https://move2link.com/xxxxx1', // Ganti dengan Move2Link ke-1
+    'https://move2link.com/xxxxx2', // Ganti dengan Move2Link ke-2
+    'https://move2link.com/xxxxx3'  // Ganti dengan Move2Link ke-3
+  ];
   
   var VALID_PASSKEY = 'BAGASXIT2026';
 
@@ -371,12 +377,19 @@
   }
 
   // ==============================================
-  // OPEN SHORTLINK METHOD (CARA 1: DYNAMIC SESSION)
+  // OPEN SHORTLINK METHOD (ROTASI MULTI-LINK + DYNAMIC SESSION)
   // ==============================================
   function openShortlink() {
+    // 1. Pilih 1 link Move2Link secara acak dari array MOVE2LINK_LIST
+    var randomIndex = Math.floor(Math.random() * MOVE2LINK_LIST.length);
+    var selectedLink = MOVE2LINK_LIST[randomIndex];
+    
+    // 2. Buat ID unik session (Dynamic Session)
     var uniqueId = Date.now() + '_' + Math.floor(Math.random() * 9000 + 1000);
-    var separator = BASE_SHORTLINK.includes('?') ? '&' : '?';
-    var dynamicUrl = BASE_SHORTLINK + separator + 'ref_session=' + uniqueId;
+    var separator = selectedLink.includes('?') ? '&' : '?';
+    
+    // 3. Gabungkan link Move2Link dengan session unik
+    var dynamicUrl = selectedLink + separator + 'ref_session=' + uniqueId;
     
     window.open(dynamicUrl, '_blank');
   }
