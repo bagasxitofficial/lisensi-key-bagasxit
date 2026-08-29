@@ -44,13 +44,9 @@
     .btn-secondary:hover { background: #2A1F4A; }
     .btn-copy { background: #0B0822; color: #A855F7; border: 1px solid #2A1F4A; flex: 0.5; }
     .btn-copy:hover { background: #1A153B; }
-    .btn-danger { background: #2D1228; color: #EF4444; border: 1px solid #5A1F2A; }
-    .btn-danger:hover { background: #3D1A32; }
     .btn-success { background: #10B981; color: #fff; }
     .btn-success:hover { background: #059669; }
-    .btn-success.disabled { opacity: 0.5; pointer-events: none; }
     .footer { text-align: center; color: #4B456B; font-size: 12px; border-top: 1px solid #1A153B; padding-top: 20px; margin-top: 10px; }
-    .footer a { color: #A855F7; text-decoration: none; }
     .message-box { text-align: center; padding: 10px; border-radius: 12px; margin-bottom: 20px; background: rgba(168,85,247,0.08); color: #A855F7; border: 1px solid rgba(168,85,247,0.15); font-size: 14px; display: none; }
     .message-box.warning { background: rgba(245,158,11,0.1); color: #F59E0B; border-color: rgba(245,158,11,0.2); }
     .message-box.error { background: rgba(239,68,68,0.1); color: #EF4444; border-color: rgba(239,68,68,0.2); }
@@ -71,7 +67,6 @@
     .admin-panel td .status-badge.inactive { background: rgba(245,158,11,0.15); color: #F59E0B; }
     .admin-panel .key-count { color: #8E8AA7; font-size: 14px; margin-bottom: 16px; }
     .admin-panel .key-count strong { color: #A855F7; }
-    .admin-panel .admin-actions { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
     .admin-panel .admin-list { margin-top: 20px; border-top: 1px solid #2A1F4A; padding-top: 16px; }
     .admin-panel .admin-list .admin-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #1A153B; }
     .admin-panel .admin-list .admin-item .username { color: #A855F7; font-weight: 600; }
@@ -91,7 +86,7 @@
 <div class="container">
   <div class="badge">⚡ BAGASXIT · GENERATOR</div>
   <h1><span>BAGASXIT</span> KEY</h1>
-  <div class="subhead" id="modeLabel">One active key · click GET to cycle after expiry</div>
+  <div class="subhead" id="modeLabel">Bypass Shortlink untuk mendapatkan Key Asli</div>
 
   <div class="status-bar">
     <span class="label">🔐 NODE STATUS</span>
@@ -104,14 +99,14 @@
   <div id="publicView">
     <div class="key-box" id="keyBox">
       <div class="key-label">📋 YOUR ACCESS KEY</div>
-      <div class="key-value" id="keyDisplay">—</div>
-      <div class="key-expiry" id="keyExpiry">⏳ <strong>Loading...</strong></div>
-      <div class="key-status" id="keyStatus">⏳ LOADING</div>
+      <div class="key-value" id="keyDisplay">LOCKED 🔒</div>
+      <div class="key-expiry" id="keyExpiry">⏳ Silakan lewati Shortlink untuk membuka Key.</div>
+      <div class="key-status expired" id="keyStatus">🔒 LOCKED</div>
     </div>
 
     <div class="btn-group">
-      <button class="btn btn-copy" id="copyBtn">📋 COPY</button>
-      <button class="btn btn-primary" id="getKeyBtn">🎲 GET KEY</button>
+      <button class="btn btn-primary" id="shortlinkBtn">🔗 GET KEY (SHORTLINK)</button>
+      <button class="btn btn-copy" id="copyBtn" style="display:none;">📋 COPY</button>
       <button class="btn btn-secondary" id="adminBtn">⚙️ ADMIN</button>
     </div>
   </div>
@@ -138,7 +133,7 @@
     <div style="overflow-x:auto;">
       <table>
         <thead>
-          <tr><th>Key</th><th>Status</th><th>Expires</th><th>HWID</th></tr>
+          <tr><th>Key</th><th>Status</th><th>Expires</th><th>HWID Device</th></tr>
         </thead>
         <tbody id="adminTableBody"></tbody>
       </table>
@@ -172,10 +167,14 @@
 
 <script>
   // ==============================================
-  // KONFIGURASI FIREBASE
+  // KONFIGURASI FIREBASE & SHORTLINK
   // ==============================================
   var FIREBASE_URL = 'https://bagasxit-official-default-rtdb.firebaseio.com/keys.json';
   var ADMIN_DB_URL = 'https://bagasxit-official-default-rtdb.firebaseio.com/admins.json';
+
+  // LINK SHORTLINK KAMU (Ganti dengan link shortlink kamu asli, sertakan ?pass=BAGASXIT2026 di target akhir shortlink)
+  var SHORTLINK_URL = 'https://example-shortlink.com/your-id'; 
+  var VALID_PASSKEY = 'BAGASXIT2026'; // Token pembuka key (bisa diubah)
 
   // ==============================================
   // DOM REFS
@@ -186,7 +185,7 @@
   var statusText = document.getElementById('statusText');
   var keyCount = document.getElementById('keyCount');
   var copyBtn = document.getElementById('copyBtn');
-  var getKeyBtn = document.getElementById('getKeyBtn');
+  var shortlinkBtn = document.getElementById('shortlinkBtn');
   var adminBtn = document.getElementById('adminBtn');
   var messageBox = document.getElementById('messageBox');
   var modeLabel = document.getElementById('modeLabel');
@@ -239,9 +238,26 @@
   }
 
   // ==============================================
-  // PUBLIC: LOAD KEYS & SHOW FIRST ACTIVE
+  // PUBLIC: VERIFIKASI TOKEN UTAMA DARI SHORTLINK
   // ==============================================
-  function loadKeysAndShow() {
+  function checkShortlinkPasskey() {
+    var urlParams = new URLSearchParams(window.location.search);
+    var pass = urlParams.get('pass');
+
+    if (pass === VALID_PASSKEY) {
+      showMessage('🎉 Berhasil melewati Shortlink! Menyiapkan Key...', 'success');
+      loadKeysAndShow(true); // Izinkan menampilkan key
+    } else {
+      // Belum lewati shortlink
+      keyDisplay.textContent = 'LOCKED 🔒';
+      keyExpiry.innerHTML = '⏳ Klik <strong>GET KEY</strong> untuk lewati Shortlink.';
+      keyStatus.textContent = '🔒 LOCKED';
+      keyStatus.className = 'key-status expired';
+      copyBtn.style.display = 'none';
+    }
+  }
+
+  function loadKeysAndShow(isUnlocked) {
     hideMessage();
     fetch(FIREBASE_URL)
       .then(function(response) {
@@ -270,10 +286,14 @@
         }
 
         currentKey = activeKeys[0];
-        renderKey(currentKey);
+
+        if (isUnlocked) {
+          renderKey(currentKey);
+          copyBtn.style.display = 'inline-block';
+        }
+
         statusText.textContent = 'AUTH / READY';
         statusText.className = 'value';
-        hideMessage();
 
         if (isAdminMode) {
           renderAdminTable();
@@ -283,63 +303,7 @@
       .catch(function(e) {
         console.error('Error loading keys:', e);
         showMessage('Error loading keys: ' + e.message, 'error');
-        keyDisplay.textContent = '⚠️ Error';
-        keyStatus.textContent = 'ERROR';
-        keyStatus.className = 'key-status expired';
-        statusText.textContent = 'ERROR';
-        statusText.className = 'value error';
       });
-  }
-
-  // ==============================================
-  // PUBLIC: GET NEXT KEY (HANYA JIKA EXPIRED)
-  // ==============================================
-  function getNextKey() {
-    var now = Date.now();
-
-    if (currentKey && currentKey.is_active === true && currentKey.expires_at > now) {
-      showMessage('🔒 Key masih aktif! Tunggu sampai expired untuk mendapatkan key baru.', 'warning');
-      return;
-    }
-
-    var activeKeys = allKeys.filter(function(k) {
-      return k.is_active === true && k.expires_at > now;
-    });
-
-    if (activeKeys.length === 0) {
-      showNoActiveState();
-      showMessage('⚠️ Tidak ada key aktif tersedia. Hubungi admin.', 'error');
-      return;
-    }
-
-    if (!currentKey || currentKey.expires_at <= now) {
-      currentKey = activeKeys[0];
-      renderKey(currentKey);
-      statusText.textContent = 'AUTH / READY';
-      statusText.className = 'value';
-      hideMessage();
-      if (isAdminMode) { renderAdminTable(); loadAdminList(); }
-      return;
-    }
-
-    var idx = -1;
-    for (var i = 0; i < activeKeys.length; i++) {
-      if (activeKeys[i].id === currentKey.id) {
-        idx = i;
-        break;
-      }
-    }
-    if (idx === -1) {
-      currentKey = activeKeys[0];
-    } else {
-      var nextIdx = (idx + 1) % activeKeys.length;
-      currentKey = activeKeys[nextIdx];
-    }
-    renderKey(currentKey);
-    statusText.textContent = 'AUTH / READY';
-    statusText.className = 'value';
-    hideMessage();
-    if (isAdminMode) { renderAdminTable(); loadAdminList(); }
   }
 
   // ==============================================
@@ -374,16 +338,11 @@
     }
   }
 
-  // ==============================================
-  // PUBLIC: EMPTY / NO ACTIVE STATES
-  // ==============================================
   function showEmptyState() {
     keyDisplay.textContent = 'No keys';
     keyExpiry.innerHTML = '⏳ <strong>Database empty</strong>';
     keyStatus.textContent = '⛔ EMPTY';
     keyStatus.className = 'key-status expired';
-    statusText.textContent = 'NO KEYS';
-    statusText.className = 'value error';
   }
 
   function showNoActiveState() {
@@ -391,15 +350,16 @@
     keyExpiry.innerHTML = '⏳ <strong>All keys expired</strong> · contact admin';
     keyStatus.textContent = '⛔ EXPIRED';
     keyStatus.className = 'key-status expired';
-    statusText.textContent = '⚠️ NO ACTIVE KEYS';
-    statusText.className = 'value error';
   }
 
   // ==============================================
   // COPY
   // ==============================================
   function copyKey() {
-    if (!currentKey) { alert('No key to copy!'); return; }
+    if (!currentKey || keyDisplay.textContent.includes('LOCKED')) { 
+      alert('Selesaikan Shortlink terlebih dahulu!'); 
+      return; 
+    }
     var text = currentKey.id || '';
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(function() {
@@ -424,7 +384,7 @@
   }
 
   // ==============================================
-  // ADMIN: LOGIN (CEK KE FIREBASE)
+  // ADMIN: LOGIN
   // ==============================================
   function handleLogin() {
     var user = loginUser.value.trim();
@@ -462,7 +422,7 @@
           modeLabel.textContent = '📋 Admin Panel · All Keys';
           statusText.textContent = '👑 ADMIN MODE';
           statusText.className = 'value';
-          loadKeysAndShow();
+          loadKeysAndShow(true);
           loadAdminList();
 
           if (currentAdmin.isMaster === true) {
@@ -481,18 +441,12 @@
       });
   }
 
-  // ==============================================
-  // ADMIN: LOAD DAFTAR ADMIN
-  // ==============================================
   function loadAdminList() {
     fetch(ADMIN_DB_URL)
       .then(function(res) { return res.json(); })
       .then(function(data) {
         adminList = data ? Object.keys(data).map(function(k) { return { id: k, ...data[k] }; }) : [];
         renderAdminList();
-      })
-      .catch(function(e) {
-        console.error('Gagal load admin:', e);
       });
   }
 
@@ -527,9 +481,6 @@
     }
   }
 
-  // ==============================================
-  // ADMIN: TAMBAH ADMIN BARU
-  // ==============================================
   function showAddAdminModal() {
     addAdminModal.style.display = 'flex';
     newAdminUser.value = '';
@@ -550,16 +501,6 @@
       addAdminError.style.display = 'block';
       return;
     }
-    var exists = false;
-    for (var i = 0; i < adminList.length; i++) {
-      if (adminList[i].username === user) { exists = true; break; }
-    }
-    if (exists) {
-      addAdminError.textContent = 'Username sudah terdaftar!';
-      addAdminError.style.display = 'block';
-      return;
-    }
-
     var payload = { username: user, password: pass, isMaster: false };
     fetch(ADMIN_DB_URL, {
       method: 'POST',
@@ -571,20 +512,10 @@
           hideAddAdminModal();
           showMessage('✅ Admin baru berhasil ditambahkan!', 'success');
           loadAdminList();
-        } else {
-          addAdminError.textContent = 'Gagal simpan ke Firebase.';
-          addAdminError.style.display = 'block';
         }
-      })
-      .catch(function(e) {
-        addAdminError.textContent = 'Error: ' + e.message;
-        addAdminError.style.display = 'block';
       });
   }
 
-  // ==============================================
-  // ADMIN: HAPUS ADMIN
-  // ==============================================
   function deleteAdmin(id) {
     var url = 'https://bagasxit-official-default-rtdb.firebaseio.com/admins/' + id + '.json';
     fetch(url, { method: 'DELETE' })
@@ -592,18 +523,10 @@
         if (res.ok) {
           showMessage('✅ Admin dihapus.', 'success');
           loadAdminList();
-        } else {
-          showMessage('Gagal hapus admin.', 'error');
         }
-      })
-      .catch(function(e) {
-        showMessage('Error: ' + e.message, 'error');
       });
   }
 
-  // ==============================================
-  // ADMIN: RENDER TABLE KEY
-  // ==============================================
   function renderAdminTable() {
     if (!allKeys || allKeys.length === 0) {
       adminTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#8E8AA7;">No keys available</td></tr>';
@@ -629,7 +552,7 @@
         statusClass = 'expired';
       }
       var expiryDate = expiry > 0 ? new Date(expiry).toLocaleString() : '—';
-      var hwid = k.hwid && k.hwid.length > 0 ? k.hwid : '—';
+      var hwid = k.hwid && k.hwid.length > 0 ? k.hwid : 'Belum Terikat (Kosong)';
       html += '<tr>' +
         '<td><strong>' + k.id + '</strong></td>' +
         '<td><span class="status-badge ' + statusClass + '">' + statusText + '</span></td>' +
@@ -641,33 +564,25 @@
     adminKeyCount.textContent = allKeys.length;
   }
 
-  // ==============================================
-  // ADMIN: LOGOUT
-  // ==============================================
   function logout() {
     isAdminMode = false;
     currentAdmin = null;
     adminView.style.display = 'none';
     loginView.style.display = 'none';
     publicView.style.display = 'block';
-    modeLabel.textContent = 'One active key · click GET to cycle after expiry';
+    modeLabel.textContent = 'Bypass Shortlink untuk mendapatkan Key Asli';
     statusText.textContent = 'AUTH / READY';
     statusText.className = 'value';
-    loadKeysAndShow();
+    checkShortlinkPasskey();
   }
 
-  // ==============================================
-  // SWITCH VIEW (PUBLIC)
-  // ==============================================
   function goToPublic() {
-    if (isAdminMode) {
-      logout();
-    } else {
+    if (isAdminMode) logout();
+    else {
       publicView.style.display = 'block';
       adminView.style.display = 'none';
       loginView.style.display = 'none';
-      modeLabel.textContent = 'One active key · click GET to cycle after expiry';
-      loadKeysAndShow();
+      checkShortlinkPasskey();
     }
   }
 
@@ -675,7 +590,9 @@
   // EVENTS
   // ==============================================
   copyBtn.addEventListener('click', copyKey);
-  getKeyBtn.addEventListener('click', getNextKey);
+  shortlinkBtn.addEventListener('click', function() {
+    window.location.href = SHORTLINK_URL;
+  });
   adminBtn.addEventListener('click', function() {
     publicView.style.display = 'none';
     loginView.style.display = 'block';
@@ -695,18 +612,8 @@
   cancelAddAdmin.addEventListener('click', hideAddAdminModal);
   confirmAddAdmin.addEventListener('click', confirmAddAdmin);
 
-  addAdminModal.addEventListener('click', function(e) {
-    if (e.target === this) hideAddAdminModal();
-  });
-
-  // ==============================================
   // START
-  // ==============================================
-  loadKeysAndShow();
-  setInterval(function() {
-    if (!isAdminMode) loadKeysAndShow();
-    else { loadKeysAndShow(); loadAdminList(); }
-  }, 30000);
+  checkShortlinkPasskey();
 </script>
 </body>
 </html>
