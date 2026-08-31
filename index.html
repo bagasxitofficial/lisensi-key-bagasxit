@@ -80,6 +80,11 @@
     .master-badge { font-size: 10px; background: #A855F7; color: #fff; padding: 2px 10px; border-radius: 20px; margin-left: 8px; }
     @media (max-width: 500px) { .container { padding: 30px 18px; } .key-box .key-value { font-size: 22px; } .btn-group { flex-direction: column; } .btn { min-width: unset; } .status-bar { flex-direction: column; align-items: flex-start; gap: 6px; } .admin-panel table { font-size: 11px; } .admin-panel th, .admin-panel td { padding: 6px 4px; } }
   </style>
+
+  <!-- FIREBASE SDK COMPATIBILITY MODE -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -114,7 +119,7 @@
   <!-- LOGIN FORM -->
   <div id="loginView" class="login-form">
     <h3 style="color:#fff; margin-bottom:20px; font-weight:600;">🔐 ADMIN ACCESS</h3>
-    <input type="text" id="loginUser" placeholder="Username" autocomplete="off" />
+    <input type="text" id="loginUser" placeholder="Username / Email Admin" autocomplete="off" />
     <input type="password" id="loginPass" placeholder="Password" />
     <button class="btn btn-primary" id="loginBtn">🔓 LOGIN</button>
     <div id="loginError" class="error-msg">❌ Username atau password salah!</div>
@@ -147,7 +152,7 @@
   </div>
 
   <div class="footer">
-    © BAGASXIT · <span id="keyCount">0 keys</span> in stock
+    © BAGASXIT · <span id="keyCount">System Online</span>
   </div>
 </div>
 
@@ -167,20 +172,22 @@
 
 <script>
   // ==============================================
-  // KONFIGURASI FIREBASE & MULTI-SHORTLINK MOVE2LINK
+  // KONFIGURASI FIREBASE INIT
   // ==============================================
-  var FIREBASE_URL = 'https://bagasxit-official-default-rtdb.firebaseio.com/keys.json';
-  var ADMIN_DB_URL = 'https://bagasxit-official-default-rtdb.firebaseio.com/admins.json';
+  var firebaseConfig = {
+    databaseURL: "https://bagasxit-official-default-rtdb.firebaseio.com"
+  };
+  firebase.initializeApp(firebaseConfig);
+  var db = firebase.database();
+  var auth = firebase.auth();
 
-  // MASUKKAN DAFTAR SHORTLINK MOVE2LINK KAMU DI SINI (3-5 LINK):
-  // Pastikan semua link Move2Link ini dibuat dengan Target URL:
-  // https://bagasxitofficial.github.io/lisensi-key-bagasxit/?pass=BAGASXIT2026
   var MOVE2LINK_LIST = [
-    'https://move2link.co/ac512ac', // Ganti dengan Move2Link ke-1
+    'https://move2link.co/ac512ac',
     'https://move2link.co/959a72b'
   ];
   
   var VALID_PASSKEY = 'BAGASXIT2026';
+  var PUBLIC_KEY_ID = 'DEFAULT_KEY'; // Sesuaikan jika ada ID key publik khusus
 
   // ==============================================
   // DOM REFS
@@ -222,8 +229,6 @@
   var allKeys = [];
   var currentKey = null;
   var isAdminMode = false;
-  var adminList = [];
-  var currentAdmin = null;
 
   function showMessage(msg, type) {
     if (!type) type = 'info';
@@ -236,12 +241,8 @@
     }, 5000);
   }
 
-  function hideMessage() {
-    messageBox.style.display = 'none';
-  }
-
   // ==============================================
-  // PUBLIC: CHECK PASSKEY
+  // PUBLIC: CHECK PASSKEY & FETCH SINGLE KEY (FIREBASE SECURE COMPATIBLE)
   // ==============================================
   function checkShortlinkPasskey() {
     var urlParams = new URLSearchParams(window.location.search);
@@ -249,15 +250,35 @@
 
     if (pass === VALID_PASSKEY) {
       showMessage('🎉 Berhasil mengenali Passkey! Menyiapkan Key...', 'success');
-      loadKeysAndShow(true);
+      loadSinglePublicKey(true);
     } else {
       keyDisplay.textContent = 'LOCKED 🔒';
       keyExpiry.innerHTML = '⏳ Klik <strong>GET KEY</strong> untuk lewati Shortlink.';
       keyStatus.textContent = '🔒 LOCKED';
       keyStatus.className = 'key-status expired';
       copyBtn.style.display = 'none';
-      loadKeysAndShow(false);
+      loadSinglePublicKey(false);
     }
+  }
+
+  function loadSinglePublicKey(isUnlocked) {
+    // Membaca ID Key secara spesifik untuk mematuhi Firebase Rules $key_id
+    db.ref('keys/' + PUBLIC_KEY_ID).once('value').then(function(snapshot) {
+      var keyData = snapshot.val();
+      if (!keyData) {
+        showEmptyState();
+        return;
+      }
+      currentKey = { id: PUBLIC_KEY_ID, ...keyData };
+      if (isUnlocked) {
+        renderKey(currentKey);
+        copyBtn.style.display = 'inline-block';
+      }
+      statusText.textContent = 'AUTH / READY';
+      statusText.className = 'value';
+    }).catch(function(err) {
+      showEmptyState();
+    });
   }
 
   function isKeyActive(k) {
@@ -266,58 +287,9 @@
     return false;
   }
 
-  function loadKeysAndShow(isUnlocked) {
-    fetch(FIREBASE_URL)
-      .then(function(response) {
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        return response.json();
-      })
-      .then(function(data) {
-        if (!data) {
-          showEmptyState();
-          return;
-        }
-
-        allKeys = Object.keys(data).map(function(k) {
-          return { id: k, ...data[k] };
-        });
-        keyCount.textContent = allKeys.length + ' keys';
-
-        var activeKeys = allKeys.filter(function(k) {
-          return isKeyActive(k);
-        });
-
-        if (activeKeys.length === 0) {
-          showNoActiveState();
-          return;
-        }
-
-        currentKey = activeKeys[0];
-
-        if (isUnlocked) {
-          renderKey(currentKey);
-          copyBtn.style.display = 'inline-block';
-        }
-
-        statusText.textContent = 'AUTH / READY';
-        statusText.className = 'value';
-
-        if (isAdminMode) {
-          renderAdminTable();
-          loadAdminList();
-        }
-      })
-      .catch(function(e) {
-        console.error('Error loading keys:', e);
-        showMessage('Error loading keys: ' + e.message, 'error');
-      });
-  }
-
   function renderKey(keyData) {
     if (!keyData) { showEmptyState(); return; }
-    
     keyDisplay.textContent = keyData.key || keyData.id || '—';
-
     if (keyData.expires_at_str || keyData.expires) {
       keyExpiry.innerHTML = '⏳ Expires: <strong>' + (keyData.expires_at_str || keyData.expires) + '</strong>';
     } else {
@@ -334,16 +306,9 @@
   }
 
   function showEmptyState() {
-    keyDisplay.textContent = 'No keys';
-    keyExpiry.innerHTML = '⏳ <strong>Database empty</strong>';
-    keyStatus.textContent = '⛔ EMPTY';
-    keyStatus.className = 'key-status expired';
-  }
-
-  function showNoActiveState() {
     keyDisplay.textContent = 'No active keys';
-    keyExpiry.innerHTML = '⏳ <strong>All keys expired</strong> · contact admin';
-    keyStatus.textContent = '⛔ EXPIRED';
+    keyExpiry.innerHTML = '⏳ <strong>Database / Key Unavailable</strong>';
+    keyStatus.textContent = '⛔ EMPTY';
     keyStatus.className = 'key-status expired';
   }
 
@@ -353,186 +318,89 @@
       return; 
     }
     var text = keyDisplay.textContent || '';
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function() {
-        var orig = copyBtn.textContent;
-        copyBtn.textContent = '✅ COPIED!';
-        setTimeout(function() { copyBtn.textContent = orig; }, 2000);
-      }).catch(function() { fallbackCopy(text); });
-    } else { fallbackCopy(text); }
+    navigator.clipboard.writeText(text).then(function() {
+      var orig = copyBtn.textContent;
+      copyBtn.textContent = '✅ COPIED!';
+      setTimeout(function() { copyBtn.textContent = orig; }, 2000);
+    });
   }
 
-  function fallbackCopy(text) {
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position = 'fixed'; ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select();
-    try { document.execCommand('copy'); } catch(e) {}
-    document.body.removeChild(ta);
-    var orig = copyBtn.textContent;
-    copyBtn.textContent = '✅ COPIED!';
-    setTimeout(function() { copyBtn.textContent = orig; }, 2000);
-  }
-
-  // ==============================================
-  // OPEN SHORTLINK METHOD (ROTASI MULTI-LINK + DYNAMIC SESSION)
-  // ==============================================
   function openShortlink() {
-    // 1. Pilih 1 link Move2Link secara acak dari array MOVE2LINK_LIST
     var randomIndex = Math.floor(Math.random() * MOVE2LINK_LIST.length);
     var selectedLink = MOVE2LINK_LIST[randomIndex];
-    
-    // 2. Buat ID unik session (Dynamic Session)
     var uniqueId = Date.now() + '_' + Math.floor(Math.random() * 9000 + 1000);
     var separator = selectedLink.includes('?') ? '&' : '?';
-    
-    // 3. Gabungkan link Move2Link dengan session unik
     var dynamicUrl = selectedLink + separator + 'ref_session=' + uniqueId;
-    
     window.open(dynamicUrl, '_blank');
   }
 
   // ==============================================
-  // ADMIN LOGIN & MANAGEMENT
+  // ADMIN AUTHENTICATION (FIREBASE AUTH COMPATIBLE)
   // ==============================================
   function handleLogin() {
     var user = loginUser.value.trim();
     var pass = loginPass.value.trim();
     if (!user || !pass) {
-      loginError.textContent = 'Isi username dan password!';
+      loginError.textContent = 'Isi username/email dan password!';
       loginError.style.display = 'block';
       return;
     }
 
-    fetch(ADMIN_DB_URL)
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        if (!data) {
-          loginError.textContent = 'Tidak ada admin terdaftar!';
-          loginError.style.display = 'block';
-          return;
-        }
-        var foundAdmin = null;
-        var foundId = null;
-        for (var key in data) {
-          if (data[key].username === user && data[key].password === pass) {
-            foundAdmin = data[key];
-            foundId = key;
-            break;
-          }
-        }
-        if (foundAdmin) {
-          loginError.style.display = 'none';
-          isAdminMode = true;
-          currentAdmin = { ...foundAdmin, id: foundId };
-          loginView.style.display = 'none';
-          adminView.style.display = 'block';
-          publicView.style.display = 'none';
-          modeLabel.textContent = '📋 Admin Panel · All Keys';
-          statusText.textContent = '👑 ADMIN MODE';
-          statusText.className = 'value';
-          loadKeysAndShow(true);
-          loadAdminList();
+    // Melakukan Login Otentikasi ke Firebase Auth
+    var email = user.includes('@') ? user : user + '@bagasxit.com';
 
-          addAdminBtn.style.display = 'inline-block';
-        } else {
-          loginError.textContent = '❌ Username atau password salah!';
-          loginError.style.display = 'block';
-        }
+    auth.signInWithEmailAndPassword(email, pass)
+      .then(function(userCredential) {
+        loginError.style.display = 'none';
+        isAdminMode = true;
+        loginView.style.display = 'none';
+        adminView.style.display = 'block';
+        publicView.style.display = 'none';
+        modeLabel.textContent = '📋 Admin Panel · All Keys';
+        statusText.textContent = '👑 ADMIN MODE';
+        statusText.className = 'value';
+        
+        loadAllKeysForAdmin();
+        loadAdminList();
+        addAdminBtn.style.display = 'inline-block';
       })
-      .catch(function(e) {
-        loginError.textContent = 'Error koneksi: ' + e.message;
+      .catch(function(error) {
+        loginError.textContent = '❌ Login Gagal: ' + error.message;
         loginError.style.display = 'block';
       });
   }
 
-  function loadAdminList() {
-    fetch(ADMIN_DB_URL)
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        adminList = data ? Object.keys(data).map(function(k) { return { id: k, ...data[k] }; }) : [];
-        renderAdminList();
-      });
+  function loadAllKeysForAdmin() {
+    // Karena Admin sudah Auth (login), Admin bisa membaca semua keys secara lengkap
+    db.ref('keys').once('value').then(function(snapshot) {
+      var data = snapshot.val();
+      allKeys = data ? Object.keys(data).map(function(k) { return { id: k, ...data[k] }; }) : [];
+      renderAdminTable();
+    });
   }
 
-  function renderAdminList() {
+  function loadAdminList() {
+    db.ref('admins').once('value').then(function(snapshot) {
+      var data = snapshot.val();
+      var adminList = data ? Object.keys(data).map(function(k) { return { id: k, ...data[k] }; }) : [];
+      renderAdminList(adminList);
+    });
+  }
+
+  function renderAdminList(adminList) {
     if (!adminList || adminList.length === 0) {
-      adminListContainer.innerHTML = '<div style="color:#8E8AA7;">Belum ada admin.</div>';
+      adminListContainer.innerHTML = '<div style="color:#8E8AA7;">Belum ada admin terdaftar.</div>';
       return;
     }
     var html = '';
     for (var i = 0; i < adminList.length; i++) {
       var adm = adminList[i];
-      var isMaster = adm.isMaster === true;
-      var masterBadge = isMaster ? '<span class="master-badge">MASTER</span>' : '';
-      var deleteBtn = '<button class="remove-btn" data-id="' + adm.id + '" data-username="' + adm.username + '">🗑️</button>';
       html += '<div class="admin-item">' +
-        '<span class="username">' + adm.username + ' ' + masterBadge + '</span>' +
-        deleteBtn +
+        '<span class="username">' + (adm.username || adm.email) + '</span>' +
+        '<button class="remove-btn" onclick="deleteAdmin(\'' + adm.id + '\')">🗑️</button>' +
         '</div>';
     }
     adminListContainer.innerHTML = html;
-
-    var removeBtns = document.querySelectorAll('.remove-btn');
-    for (var j = 0; j < removeBtns.length; j++) {
-      removeBtns[j].addEventListener('click', function() {
-        var id = this.dataset.id;
-        var username = this.dataset.username;
-        if (confirm('Hapus admin "' + username + '"?')) {
-          deleteAdmin(id);
-        }
-      });
-    }
-  }
-
-  function showAddAdminModal() {
-    addAdminModal.style.display = 'flex';
-    newAdminUser.value = '';
-    newAdminPass.value = '';
-    addAdminError.style.display = 'none';
-    newAdminUser.focus();
-  }
-
-  function hideAddAdminModal() {
-    addAdminModal.style.display = 'none';
-  }
-
-  function processAddAdmin() {
-    var user = newAdminUser.value.trim();
-    var pass = newAdminPass.value.trim();
-    if (!user || !pass) {
-      addAdminError.textContent = 'Username dan password tidak boleh kosong!';
-      addAdminError.style.display = 'block';
-      return;
-    }
-    var payload = { username: user, password: pass, isMaster: false };
-    fetch(ADMIN_DB_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-      .then(function(res) {
-        if (res.ok) {
-          hideAddAdminModal();
-          showMessage('✅ Admin baru berhasil ditambahkan!', 'success');
-          loadAdminList();
-        } else {
-          addAdminError.textContent = 'Gagal menambah admin! (Error: ' + res.status + ')';
-          addAdminError.style.display = 'block';
-        }
-      });
-  }
-
-  function deleteAdmin(id) {
-    var url = 'https://bagasxit-official-default-rtdb.firebaseio.com/admins/' + id + '.json';
-    fetch(url, { method: 'DELETE' })
-      .then(function(res) {
-        if (res.ok) {
-          showMessage('✅ Admin dihapus.', 'success');
-          loadAdminList();
-        }
-      });
   }
 
   function renderAdminTable() {
@@ -541,15 +409,13 @@
       adminKeyCount.textContent = '0';
       return;
     }
-
     var html = '';
     for (var i = 0; i < allKeys.length; i++) {
       var k = allKeys[i];
       var statusTextStr = isKeyActive(k) ? 'ACTIVE' : 'INACTIVE';
       var statusClassStr = isKeyActive(k) ? '' : 'inactive';
-
-      var expiryDate = k.expires_at_str || k.expires || (k.expires_at ? new Date(k.expires_at).toLocaleString() : '—');
-      var hwid = (k.hwid && k.hwid.length > 0) ? k.hwid : 'Belum Terikat (Kosong)';
+      var expiryDate = k.expires_at_str || k.expires || '—';
+      var hwid = (k.hwid && k.hwid.length > 0) ? k.hwid : 'Belum Terikat';
       html += '<tr>' +
         '<td><strong>' + (k.key || k.id) + '</strong></td>' +
         '<td><span class="status-badge ' + statusClassStr + '">' + statusTextStr + '</span></td>' +
@@ -562,15 +428,16 @@
   }
 
   function logout() {
-    isAdminMode = false;
-    currentAdmin = null;
-    adminView.style.display = 'none';
-    loginView.style.display = 'none';
-    publicView.style.display = 'block';
-    modeLabel.textContent = 'Bypass Shortlink untuk mendapatkan Key Asli';
-    statusText.textContent = 'AUTH / READY';
-    statusText.className = 'value';
-    checkShortlinkPasskey();
+    auth.signOut().then(function() {
+      isAdminMode = false;
+      adminView.style.display = 'none';
+      loginView.style.display = 'none';
+      publicView.style.display = 'block';
+      modeLabel.textContent = 'Bypass Shortlink untuk mendapatkan Key Asli';
+      statusText.textContent = 'AUTH / READY';
+      statusText.className = 'value';
+      checkShortlinkPasskey();
+    });
   }
 
   function goToPublic() {
@@ -583,9 +450,7 @@
     }
   }
 
-  // ==============================================
   // LISTENERS
-  // ==============================================
   copyBtn.addEventListener('click', copyKey);
   shortlinkBtn.addEventListener('click', openShortlink);
   adminBtn.addEventListener('click', function() {
@@ -597,17 +462,10 @@
     statusText.className = 'value warning';
   });
   loginBtn.addEventListener('click', handleLogin);
-  loginPass.addEventListener('keydown', function(e) { if (e.key === 'Enter') handleLogin(); });
-  loginUser.addEventListener('keydown', function(e) { if (e.key === 'Enter') handleLogin(); });
   backToPublicBtn.addEventListener('click', goToPublic);
   logoutBtn.addEventListener('click', logout);
   backToPublicFromAdmin.addEventListener('click', goToPublic);
 
-  addAdminBtn.addEventListener('click', showAddAdminModal);
-  cancelAddAdmin.addEventListener('click', hideAddAdminModal);
-  confirmAddAdminBtn.addEventListener('click', processAddAdmin);
-
-  // EXECUTE ON START
   checkShortlinkPasskey();
 </script>
 </body>
