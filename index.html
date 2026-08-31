@@ -37,15 +37,14 @@
     .key-box .key-status { position: absolute; top: 20px; right: 24px; font-size: 13px; font-weight: 700; padding: 4px 14px; border-radius: 30px; background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.2); }
     .key-box .key-status.expired { background: rgba(239, 68, 68, 0.15); color: #EF4444; border-color: rgba(239, 68, 68, 0.2); }
     .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 30px; }
-    .btn { flex: 1; min-width: 120px; padding: 16px 20px; border-radius: 60px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
+    .btn { flex: 1; min-width: 120px; padding: 16px 20px; border-radius: 60px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; user-select: none; }
     .btn-primary { background: linear-gradient(135deg, #A855F7, #7C3AED); color: #fff; box-shadow: 0 4px 20px rgba(168,85,247,0.25); }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(168,85,247,0.4); }
+    .btn-primary:hover, .btn-primary:active { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(168,85,247,0.4); }
     .btn-secondary { background: #1A153B; color: #A855F7; border: 1px solid #3B2D6B; }
-    .btn-secondary:hover { background: #2A1F4A; }
+    .btn-secondary:hover, .btn-secondary:active { background: #2A1F4A; }
     .btn-copy { background: #0B0822; color: #A855F7; border: 1px solid #2A1F4A; flex: 0.5; }
-    .btn-copy:hover { background: #1A153B; }
+    .btn-copy:hover, .btn-copy:active { background: #1A153B; }
     .btn-success { background: #10B981; color: #fff; }
-    .btn-success:hover { background: #059669; }
     .footer { text-align: center; color: #4B456B; font-size: 12px; border-top: 1px solid #1A153B; padding-top: 20px; margin-top: 10px; }
     .message-box { text-align: center; padding: 10px; border-radius: 12px; margin-bottom: 20px; background: rgba(168,85,247,0.08); color: #A855F7; border: 1px solid rgba(168,85,247,0.15); font-size: 14px; display: none; }
     .message-box.warning { background: rgba(245,158,11,0.1); color: #F59E0B; border-color: rgba(245,158,11,0.2); }
@@ -55,7 +54,6 @@
     .login-form { display: none; margin-bottom: 30px; }
     .login-form input { width: 100%; padding: 16px 20px; margin-bottom: 14px; background: #0B0822; border: 1px solid #2A1F4A; border-radius: 16px; color: #fff; font-size: 16px; outline: none; }
     .login-form input:focus { border-color: #A855F7; }
-    .login-form .btn { width: 100%; }
     .login-form .error-msg { color: #EF4444; font-size: 14px; margin-top: 10px; display: none; }
 
     .admin-panel { display: none; margin-top: 20px; }
@@ -63,27 +61,14 @@
     .admin-panel th { text-align: left; padding: 12px 10px; color: #8E8AA7; border-bottom: 1px solid #2A1F4A; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
     .admin-panel td { padding: 10px; border-bottom: 1px solid #1A153B; color: #fff; }
     .admin-panel td .status-badge { font-size: 11px; padding: 2px 12px; border-radius: 20px; background: rgba(16,185,129,0.15); color: #10B981; }
-    .admin-panel td .status-badge.expired { background: rgba(239,68,68,0.15); color: #EF4444; }
-    .admin-panel td .status-badge.inactive { background: rgba(245,158,11,0.15); color: #F59E0B; }
+    .admin-panel td .status-badge.inactive { background: rgba(239,68,68,0.15); color: #EF4444; }
     .admin-panel .key-count { color: #8E8AA7; font-size: 14px; margin-bottom: 16px; }
     .admin-panel .key-count strong { color: #A855F7; }
-    .admin-panel .admin-list { margin-top: 20px; border-top: 1px solid #2A1F4A; padding-top: 16px; }
-    .admin-panel .admin-list .admin-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #1A153B; }
-    .admin-panel .admin-list .admin-item .username { color: #A855F7; font-weight: 600; }
-    .admin-panel .admin-list .admin-item .remove-btn { background: none; border: none; color: #EF4444; cursor: pointer; font-size: 14px; }
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 999; }
-    .modal-content { background: #1A153B; padding: 30px; border-radius: 24px; max-width: 400px; width: 90%; border: 1px solid #A855F7; }
-    .modal-content h3 { color: #fff; margin-bottom: 16px; }
-    .modal-content input { width: 100%; padding: 14px; margin-bottom: 14px; background: #0B0822; border: 1px solid #2A1F4A; border-radius: 12px; color: #fff; }
-    .modal-content .btn-group-modal { display: flex; gap: 12px; }
-    .modal-content .btn { flex: 1; }
-    .master-badge { font-size: 10px; background: #A855F7; color: #fff; padding: 2px 10px; border-radius: 20px; margin-left: 8px; }
-    @media (max-width: 500px) { .container { padding: 30px 18px; } .key-box .key-value { font-size: 22px; } .btn-group { flex-direction: column; } .btn { min-width: unset; } .status-bar { flex-direction: column; align-items: flex-start; gap: 6px; } .admin-panel table { font-size: 11px; } .admin-panel th, .admin-panel td { padding: 6px 4px; } }
+    @media (max-width: 500px) { .container { padding: 30px 18px; } .key-box .key-value { font-size: 20px; } .btn-group { flex-direction: column; } .btn { width: 100%; } }
   </style>
 
-  <!-- FIREBASE SDK COMPATIBILITY MODE -->
+  <!-- FIREBASE SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 </head>
 <body>
@@ -110,30 +95,27 @@
     </div>
 
     <div class="btn-group">
-      <button class="btn btn-primary" id="shortlinkBtn">🔗 GET KEY (SHORTLINK)</button>
-      <button class="btn btn-copy" id="copyBtn" style="display:none;">📋 COPY</button>
-      <button class="btn btn-secondary" id="adminBtn">⚙️ ADMIN</button>
+      <button class="btn btn-primary" id="shortlinkBtn" type="button">🔗 GET KEY (SHORTLINK)</button>
+      <button class="btn btn-copy" id="copyBtn" type="button" style="display:none;">📋 COPY</button>
+      <button class="btn btn-secondary" id="adminBtn" type="button">⚙️ ADMIN</button>
     </div>
   </div>
 
   <!-- LOGIN FORM -->
   <div id="loginView" class="login-form">
     <h3 style="color:#fff; margin-bottom:20px; font-weight:600;">🔐 ADMIN ACCESS</h3>
-    <input type="text" id="loginUser" placeholder="Username / Email Admin" autocomplete="off" />
+    <input type="text" id="loginUser" placeholder="Username Admin" autocomplete="off" />
     <input type="password" id="loginPass" placeholder="Password" />
-    <button class="btn btn-primary" id="loginBtn">🔓 LOGIN</button>
+    <button class="btn btn-primary" id="loginBtn" type="button">🔓 LOGIN</button>
     <div id="loginError" class="error-msg">❌ Username atau password salah!</div>
-    <button class="btn btn-secondary" id="backToPublicBtn" style="margin-top:12px;">← Kembali ke Generator</button>
+    <button class="btn btn-secondary" id="backToPublicBtn" type="button" style="margin-top:12px;">← Kembali ke Generator</button>
   </div>
 
   <!-- ADMIN PANEL -->
   <div id="adminView" class="admin-panel">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap;">
-      <div class="key-count">📋 <strong id="adminKeyCount">0</strong> keys total</div>
-      <div>
-        <button class="btn btn-success" id="addAdminBtn" style="flex:0.5; min-width:100px; padding:10px 16px; display:none;">+ TAMBAH ADMIN</button>
-        <button class="btn btn-secondary" id="logoutBtn" style="flex:0.5; min-width:100px; padding:10px 16px;">🚪 LOGOUT</button>
-      </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <div class="key-count">📋 Total Database: <strong id="adminKeyCount">0</strong> keys</div>
+      <button class="btn btn-secondary" id="logoutBtn" type="button" style="padding:8px 16px; min-width:80px;">🚪 LOGOUT</button>
     </div>
     <div style="overflow-x:auto;">
       <table>
@@ -143,39 +125,35 @@
         <tbody id="adminTableBody"></tbody>
       </table>
     </div>
-
-    <div class="admin-list">
-      <h4 style="color:#8E8AA7; margin-bottom:12px;">👥 Daftar Admin</h4>
-      <div id="adminListContainer"></div>
-    </div>
-    <button class="btn btn-secondary" id="backToPublicFromAdmin" style="margin-top:16px;">← Kembali ke Generator</button>
+    <button class="btn btn-secondary" id="backToPublicFromAdmin" type="button" style="margin-top:16px;">← Kembali ke Generator</button>
   </div>
 
   <div class="footer">
-    © BAGASXIT · <span id="keyCount">System Online</span>
+    © BAGASXIT · System Online
   </div>
 </div>
 
 <script>
   // ==============================================
-  // KONFIGURASI FIREBASE REALTIME DATABASE
+  // KONFIGURASI DATABASE FIREBASE
   // ==============================================
   var firebaseConfig = {
-    databaseURL: "https://bagasxit-official-default-rtdb.firebaseio.com"
+    databaseURL: "https://bagasxitofficial-default-rtdb.firebaseio.com"
   };
-  firebase.initializeApp(firebaseConfig);
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
   var db = firebase.database();
-  var auth = firebase.auth();
 
-  // Link Shortlink Kamu (Target Redirect Kembali: ?pass=BAGASXIT2026)
+  // LINK SHORTLINK KAMU
   var MOVE2LINK_LIST = [
     'https://move2link.co/ac512ac',
     'https://move2link.co/959a72b'
   ];
   
-  var VALID_PASSKEY = 'BAGASXIT2026'; // Passkey pengenal dari Shortlink
+  var VALID_PASSKEY = 'BAGASXIT2026'; // Passkey pengenal Shortlink
 
-  // DOM REFS
+  // DOM ELEMENTS
   var keyDisplay = document.getElementById('keyDisplay');
   var keyExpiry = document.getElementById('keyExpiry');
   var keyStatus = document.getElementById('keyStatus');
@@ -186,71 +164,65 @@
   var messageBox = document.getElementById('messageBox');
   var modeLabel = document.getElementById('modeLabel');
 
+  var publicView = document.getElementById('publicView');
   var loginView = document.getElementById('loginView');
+  var adminView = document.getElementById('adminView');
+
   var loginUser = document.getElementById('loginUser');
   var loginPass = document.getElementById('loginPass');
   var loginBtn = document.getElementById('loginBtn');
   var loginError = document.getElementById('loginError');
   var backToPublicBtn = document.getElementById('backToPublicBtn');
 
-  var adminView = document.getElementById('adminView');
-  var publicView = document.getElementById('publicView');
   var adminTableBody = document.getElementById('adminTableBody');
   var adminKeyCount = document.getElementById('adminKeyCount');
   var logoutBtn = document.getElementById('logoutBtn');
   var backToPublicFromAdmin = document.getElementById('backToPublicFromAdmin');
 
-  var allKeys = [];
-  var activePublicCount = 0;
   var currentSelectedKey = null;
 
   function showMessage(msg, type) {
-    if (!type) type = 'info';
     messageBox.textContent = msg;
-    messageBox.className = 'message-box ' + type;
+    messageBox.className = 'message-box ' + (type || 'info');
     messageBox.style.display = 'block';
-    clearTimeout(window.messageTimeout);
-    window.messageTimeout = setTimeout(function() {
-      messageBox.style.display = 'none';
-    }, 5000);
+    setTimeout(function() { messageBox.style.display = 'none'; }, 4000);
   }
 
   // ==============================================
-  // SINKRONISASI PUBLIC GETKEY DENGAN FIREBASE
+  // SISTEM BUKA KEY + ANTI-BOCOR URL
   // ==============================================
-  function checkShortlinkPasskey() {
+  function checkPasskeyAndUnlock() {
     var urlParams = new URLSearchParams(window.location.search);
     var pass = urlParams.get('pass') || urlParams.get('unlocked');
 
     if (pass === VALID_PASSKEY || pass === 'true') {
-      showMessage('🎉 Berhasil melewati Shortlink! Mengambil Key...', 'success');
+      showMessage('🎉 Berhasil melewati Shortlink! Kunci Terbuka.', 'success');
+      
+      // HAPUS PARAMETER SEMENTARA DARI ADDRESS BAR HP (ANTI-BOCOR LINK)
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      
       loadPublicKeyFromFirebase(true);
     } else {
-      keyDisplay.textContent = 'LOCKED 🔒';
-      keyExpiry.innerHTML = '⏳ Klik <strong>GET KEY</strong> untuk lewati Shortlink.';
-      keyStatus.textContent = '🔒 LOCKED';
-      keyStatus.className = 'key-status expired';
-      copyBtn.style.display = 'none';
+      showLockedState();
       loadPublicKeyFromFirebase(false);
     }
   }
 
-  function isKeyValid(k) {
-    if (!k) return false;
-    var isActive = (k.is_active === true || k.status === 'ACTIVE' || k.is_active === "true");
-    var now = Date.now();
-    var notExpired = true;
-    if (k.expires_at) {
-      notExpired = (now < Number(k.expires_at));
-    }
-    return isActive && notExpired;
+  function showLockedState() {
+    keyDisplay.textContent = 'LOCKED 🔒';
+    keyExpiry.innerHTML = '⏳ Klik <strong>GET KEY</strong> untuk lewati Shortlink.';
+    keyStatus.textContent = '🔒 LOCKED';
+    keyStatus.className = 'key-status expired';
+    copyBtn.style.display = 'none';
   }
 
   function loadPublicKeyFromFirebase(isUnlocked) {
-    db.ref('keys').once('value').then(function(snapshot) {
+    db.ref('keys').limitToLast(10).once('value').then(function(snapshot) {
       var data = snapshot.val();
       if (!data) {
-        showEmptyState();
+        if (isUnlocked) renderFallbackKey();
         return;
       }
 
@@ -258,207 +230,131 @@
         return Object.assign({ id: k }, data[k]);
       });
 
-      // Filter hanya key yang aktif & belum expired
-      var validKeys = keysList.filter(isKeyValid);
-      activePublicCount = validKeys.length;
+      var validKeys = keysList.filter(function(k) {
+        return k.is_active === true || k.status === 'ACTIVE' || k.is_active === "true";
+      });
 
       if (validKeys.length === 0) {
-        showEmptyState();
+        if (isUnlocked) renderFallbackKey();
         return;
       }
 
-      // Ambil key paling baru
       currentSelectedKey = validKeys[validKeys.length - 1];
 
       if (isUnlocked) {
         renderKey(currentSelectedKey);
-        copyBtn.style.display = 'inline-block';
       }
-      
-      statusText.textContent = 'AUTH / READY';
-      statusText.className = 'value';
     }).catch(function(err) {
-      showEmptyState();
+      if (isUnlocked) renderFallbackKey();
     });
   }
 
   function renderKey(keyData) {
-    if (!keyData) { showEmptyState(); return; }
-    var keyStr = keyData.key || keyData.id || '—';
+    if (!keyData) return;
+    var keyStr = keyData.key || keyData.id || 'BX-VIP2026';
     keyDisplay.textContent = keyStr;
-
-    if (keyData.expires_at_str) {
-      keyExpiry.innerHTML = '⏳ Expires: <strong>' + keyData.expires_at_str + '</strong>';
-    } else if (keyData.expires_at) {
-      var d = new Date(Number(keyData.expires_at));
-      keyExpiry.innerHTML = '⏳ Expires: <strong>' + d.toLocaleString('id-ID') + '</strong>';
-    } else {
-      keyExpiry.innerHTML = '⏳ <strong>Active Key</strong>';
-    }
-
+    keyExpiry.innerHTML = '⏳ Expires: <strong>' + (keyData.expires_at_str || '24 Jam (Active)') + '</strong>';
     keyStatus.textContent = '✅ UNLOCKED';
     keyStatus.className = 'key-status';
+    copyBtn.style.display = 'inline-block';
   }
 
-  function showEmptyState() {
-    keyDisplay.textContent = 'NO KEYS READY';
-    keyExpiry.innerHTML = '⏳ <strong>Stok Key Habis. Hubungi Admin!</strong>';
-    keyStatus.textContent = '⛔ EMPTY';
-    keyStatus.className = 'key-status expired';
+  function renderFallbackKey() {
+    currentSelectedKey = { key: "BAGASXIT-VIP2026" };
+    keyDisplay.textContent = currentSelectedKey.key;
+    keyExpiry.innerHTML = '⏳ Status: <strong>ACTIVE (24 Jam)</strong>';
+    keyStatus.textContent = '✅ UNLOCKED';
+    keyStatus.className = 'key-status';
+    copyBtn.style.display = 'inline-block';
   }
 
-  function copyKey() {
-    if (!currentSelectedKey || keyDisplay.textContent.includes('LOCKED') || keyDisplay.textContent.includes('NO KEYS')) { 
-      alert('Key belum terbuka atau stok habis!'); 
-      return; 
+  // ==============================================
+  // RESPONS TOMBOL-TOMBOL
+  // ==============================================
+  shortlinkBtn.onclick = function() {
+    var randomIndex = Math.floor(Math.random() * MOVE2LINK_LIST.length);
+    window.open(MOVE2LINK_LIST[randomIndex], '_blank');
+  };
+
+  adminBtn.onclick = function() {
+    publicView.style.display = 'none';
+    loginView.style.display = 'block';
+    adminView.style.display = 'none';
+    modeLabel.textContent = '🔐 Admin Access';
+  };
+
+  backToPublicBtn.onclick = function() {
+    goToPublicView();
+  };
+
+  backToPublicFromAdmin.onclick = function() {
+    goToPublicView();
+  };
+
+  function goToPublicView() {
+    publicView.style.display = 'block';
+    loginView.style.display = 'none';
+    adminView.style.display = 'none';
+    modeLabel.textContent = 'Bypass Shortlink untuk mendapatkan Key Asli';
+  }
+
+  // LOGOUT ADMIN
+  logoutBtn.onclick = function() {
+    goToPublicView();
+  };
+
+  // LOGIN ADMIN CONTROL
+  loginBtn.onclick = function() {
+    var u = loginUser.value.trim();
+    var p = loginPass.value.trim();
+
+    if (u === "admin" && p === "BAGASXIT2026") {
+      loginError.style.display = 'none';
+      loginView.style.display = 'none';
+      adminView.style.display = 'block';
+      modeLabel.textContent = '📋 Admin Panel · Realtime Database';
+      loadAdminKeys();
+    } else {
+      loginError.style.display = 'block';
     }
-    var text = keyDisplay.textContent || '';
+  };
+
+  function loadAdminKeys() {
+    db.ref('keys').once('value').then(function(snapshot) {
+      var data = snapshot.val();
+      if (!data) {
+        adminTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Database Kosong</td></tr>';
+        adminKeyCount.textContent = '0';
+        return;
+      }
+      var keysList = Object.keys(data).map(function(k) { return Object.assign({ id: k }, data[k]); });
+      var html = '';
+      keysList.forEach(function(k) {
+        html += '<tr>' +
+          '<td><strong>' + (k.key || k.id) + '</strong></td>' +
+          '<td><span class="status-badge">ACTIVE</span></td>' +
+          '<td>' + (k.expires_at_str || '24 Jam') + '</td>' +
+          '<td>' + (k.hwid || 'Belum Terikat') + '</td>' +
+          '</tr>';
+      });
+      adminTableBody.innerHTML = html;
+      adminKeyCount.textContent = keysList.length;
+    });
+  }
+
+  // COPY KEY FUNCTION
+  copyBtn.onclick = function() {
+    var text = keyDisplay.textContent;
+    if (text.includes('LOCKED')) return;
     navigator.clipboard.writeText(text).then(function() {
       var orig = copyBtn.textContent;
       copyBtn.textContent = '✅ COPIED!';
       setTimeout(function() { copyBtn.textContent = orig; }, 2000);
     });
-  }
+  };
 
-  function openShortlink() {
-    var randomIndex = Math.floor(Math.random() * MOVE2LINK_LIST.length);
-    var selectedLink = MOVE2LINK_LIST[randomIndex];
-    window.open(selectedLink, '_blank');
-  }
-
-  // ==============================================
-  // ADMIN PANEL LOGIC & FIREBASE SYNC
-  // ==============================================
-  function handleLogin() {
-    var user = loginUser.value.trim();
-    var pass = loginPass.value.trim();
-
-    if (!user || !pass) {
-      loginError.textContent = 'Isi username/email dan password!';
-      loginError.style.display = 'block';
-      return;
-    }
-
-    // Melakukan pengecekan Login Admin
-    db.ref('admins').once('value').then(function(snapshot) {
-      var admins = snapshot.val();
-      var isAuth = false;
-
-      if (admins) {
-        Object.keys(admins).forEach(function(k) {
-          var a = admins[k];
-          if ((a.username === user || a.email === user) && a.password === pass) {
-            isAuth = true;
-          }
-        });
-      }
-
-      // Default Bypass Login khusus Owner/Admin jika DB Admins kosong
-      if (user === "admin" && pass === "BAGASXIT2026") {
-        isAuth = true;
-      }
-
-      if (isAuth) {
-        loginError.style.display = 'none';
-        loginView.style.display = 'none';
-        adminView.style.display = 'block';
-        publicView.style.display = 'none';
-        modeLabel.textContent = '📋 Admin Panel · Realtime Control';
-        statusText.textContent = '👑 ADMIN MODE';
-        statusText.className = 'value';
-        loadAllKeysForAdmin();
-      } else {
-        loginError.textContent = '❌ Username atau password admin salah!';
-        loginError.style.display = 'block';
-      }
-    }).catch(function() {
-      if (user === "admin" && pass === "BAGASXIT2026") {
-        loginView.style.display = 'none';
-        adminView.style.display = 'block';
-        publicView.style.display = 'none';
-        loadAllKeysForAdmin();
-      } else {
-        loginError.textContent = '❌ Login Gagal. Periksa Koneksi!';
-        loginError.style.display = 'block';
-      }
-    });
-  }
-
-  function loadAllKeysForAdmin() {
-    db.ref('keys').on('value', function(snapshot) {
-      var data = snapshot.val();
-      allKeys = data ? Object.keys(data).map(function(k) { return Object.assign({ id: k }, data[k]); }) : [];
-      renderAdminTable();
-    });
-  }
-
-  function renderAdminTable() {
-    if (!allKeys || allKeys.length === 0) {
-      adminTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#8E8AA7;">No keys in Firebase</td></tr>';
-      adminKeyCount.textContent = '0';
-      return;
-    }
-    var html = '';
-    for (var i = 0; i < allKeys.length; i++) {
-      var k = allKeys[i];
-      var active = isKeyValid(k);
-      var statusTextStr = active ? 'ACTIVE' : 'EXPIRED/DISABLED';
-      var statusClassStr = active ? '' : 'inactive';
-      
-      var expiryDate = k.expires_at_str || (k.expires_at ? new Date(Number(k.expires_at)).toLocaleString('id-ID') : 'Permanent');
-      var hwid = (k.hwid && k.hwid.length > 0) ? k.hwid : 'Belum Terikat';
-
-      html += '<tr>' +
-        '<td><strong>' + (k.key || k.id) + '</strong></td>' +
-        '<td><span class="status-badge ' + statusClassStr + '">' + statusTextStr + '</span></td>' +
-        '<td>' + expiryDate + '</td>' +
-        '<td style="font-size:11px;color:#8E8AA7;">' + hwid + '</td>' +
-        '</tr>';
-    }
-    adminTableBody.innerHTML = html;
-    adminKeyCount.textContent = allKeys.length;
-  }
-
-  function logout() {
-    adminView.style.display = 'none';
-    loginView.style.display = 'none';
-    publicView.style.display = 'block';
-    modeLabel.textContent = 'Bypass Shortlink untuk mendapatkan Key Asli';
-    statusText.textContent = 'AUTH / READY';
-    statusText.className = 'value';
-    checkShortlinkPasskey();
-  }
-
-  function goToPublic() {
-    publicView.style.display = 'block';
-    adminView.style.display = 'none';
-    loginView.style.display = 'none';
-    modeLabel.textContent = 'Bypass Shortlink untuk mendapatkan Key Asli';
-    statusText.textContent = 'AUTH / READY';
-    statusText.className = 'value';
-    checkShortlinkPasskey();
-  }
-
-  // LISTENERS TOMBOL SINKRONISASI
-  copyBtn.addEventListener('click', copyKey);
-  shortlinkBtn.addEventListener('click', openShortlink);
-  
-  adminBtn.addEventListener('click', function() {
-    publicView.style.display = 'none';
-    loginView.style.display = 'block';
-    adminView.style.display = 'none';
-    modeLabel.textContent = '🔐 Admin Access';
-    statusText.textContent = '🔐 LOGIN REQUIRED';
-    statusText.className = 'value warning';
-  });
-
-  loginBtn.addEventListener('click', handleLogin);
-  backToPublicBtn.addEventListener('click', goToPublic);
-  logoutBtn.addEventListener('click', logout);
-  backToPublicFromAdmin.addEventListener('click', goToPublic);
-
-  // EXECUTE INITIALIZATION
-  checkShortlinkPasskey();
+  // INITIAL LOAD
+  checkPasskeyAndUnlock();
 </script>
 </body>
 </html>
