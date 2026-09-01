@@ -18,7 +18,7 @@
     .btn-copy { background: #10B981; display: none; }
     .info { color: #8E8AA7; font-size: 13px; margin-top: 15px; }
     
-    /* PANEL ADMIN WEB (TERSEMBUNYI) */
+    /* PANEL ADMIN WEB TERSEMBUNYI */
     .admin-panel { display: none; margin-top: 25px; padding-top: 20px; border-top: 1px dashed #3B2D6B; text-align: left; }
     .admin-panel h3 { color: #A855F7; font-size: 14px; margin-bottom: 10px; text-align: center; }
     .admin-input { width: 100%; padding: 10px; margin-bottom: 10px; background: #0F0B21; border: 1px solid #3B2D6B; border-radius: 8px; color: #fff; font-size: 12px; }
@@ -58,14 +58,13 @@
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   var db = firebase.database();
 
-  // LIST SHORTLINK UNTUK ROTASI CPM MAKSIMAL
   var SHORTLINK_URLS = [
     'https://move2link.co/ac512ac',
     'https://move2link.co/959a72b'
   ];
   
-  var VALID_PASSKEY = 'BAGASXIT2026';
-  var DURATION_HOURS = 5; // DITETAPKAN 5 JAM
+  var DURATION_HOURS = 5;
+  var SECRET_SALT = "BAGASXIT_SECURE_TOKEN_2026"; 
 
   var keyDisplay = document.getElementById('keyDisplay');
   var keyTimer = document.getElementById('keyTimer');
@@ -74,20 +73,49 @@
   var statusInfo = document.getElementById('statusInfo');
   var adminPanel = document.getElementById('adminPanel');
 
+  // ALGORITMA MEMBUAT TOKEN 60 DETIK
+  function generateTimeToken(timeWindow) {
+    var str = SECRET_SALT + "_" + timeWindow;
+    var hash = 0;
+    for (var i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash).toString(36);
+  }
+
+  function isValidToken(token) {
+    if (!token) return false;
+    var nowWindow = Math.floor(Date.now() / 60000); 
+    
+    var validNow = generateTimeToken(nowWindow);
+    var validPrev = generateTimeToken(nowWindow - 1);
+
+    return (token === validNow || token === validPrev);
+  }
+
   function init() {
     var params = new URLSearchParams(window.location.search);
-    var pass = params.get('pass') || params.get('unlocked');
+    var token = params.get('token') || params.get('pass');
     var isAdmin = params.get('admin');
 
-    // AKTIFKAN PANEL ADMIN JIKA URL MENGGUNAKAN ?admin=true
     if (isAdmin === 'true' || isAdmin === '1') {
       adminPanel.style.display = 'block';
     }
 
-    if (pass === VALID_PASSKEY || pass === 'true') {
+    if (isValidToken(token)) {
       if (window.history && window.history.replaceState) {
         window.history.replaceState({}, document.title, window.location.pathname);
       }
+      
+      var usedTokenKey = "used_tok_" + token;
+      if (localStorage.getItem(usedTokenKey)) {
+        statusInfo.textContent = "❌ Link kadaluarsa / sudah pernah digunakan!";
+        checkDeviceExistingKey();
+        return;
+      }
+      
+      localStorage.setItem(usedTokenKey, "1");
       handleUserGetNewKey();
     } else {
       checkDeviceExistingKey();
@@ -125,7 +153,7 @@
   }
 
   function createNewKeyInFirebase(customName, hours) {
-    statusInfo.textContent = "⚙️ Membuat key unik baru...";
+    statusInfo.textContent = "⚙️ Memverifikasi token & membuat key...";
     var randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     var newKey = customName ? customName.trim() : ("BX-" + randomCode);
     var now = Date.now();
@@ -158,16 +186,10 @@
     copyBtn.style.display = "block";
   }
 
-  // TRIK BYPASS BOT & OPTIMASI CPM MOVE2LINK
   getBtn.onclick = function() {
     var randIndex = Math.floor(Math.random() * SHORTLINK_URLS.length);
     var baseUrl = SHORTLINK_URLS[randIndex];
-    
-    // Tambahkan parameter acak di akhir URL agar unik & terhitung sebagai Unique Click oleh ad-network
-    var randomParam = "?ref=" + Math.random().toString(36).substring(7);
-    var targetUrl = baseUrl + randomParam;
-    
-    window.open(targetUrl, '_blank');
+    window.open(baseUrl, '_blank');
   };
 
   copyBtn.onclick = function() {
@@ -176,7 +198,6 @@
     setTimeout(() => { copyBtn.textContent = "📋 SALIN KEY"; }, 2000);
   };
 
-  // TOMBOL ADMIN MANUAL GENERATE
   document.getElementById('btnAdminGen').onclick = function() {
     var cKey = document.getElementById('customKey').value;
     var cHours = parseFloat(document.getElementById('customHours').value) || 5;
