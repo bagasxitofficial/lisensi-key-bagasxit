@@ -82,6 +82,7 @@
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   var db = firebase.database();
 
+  // DAFTAR SHORTLINK MOVE2LINK KAMU
   var SHORTLINK_URLS = [
     'https://move2link.co/d6e38d7',
     'https://move2link.co/74b15b4',
@@ -92,7 +93,6 @@
   ];
   
   var DURATION_HOURS = 5;
-  var SECRET_SALT = "BAGASXIT_SECURE_TOKEN_2026"; 
 
   var keyDisplay = document.getElementById('keyDisplay');
   var keyTimer = document.getElementById('keyTimer');
@@ -106,54 +106,34 @@
   function onTurnstileSuccess(token) {
     turnstileBox.style.display = "none";
     getBtn.style.display = "block";
-    statusInfo.textContent = "✅ Cloudflare verification to continue.";
-  }
-
-  // ALGORITMA MEMBUAT TOKEN 60 DETIK
-  function generateTimeToken(timeWindow) {
-    var str = SECRET_SALT + "_" + timeWindow;
-    var hash = 0;
-    for (var i = 0; i < str.length; i++) {
-      hash = ((hash << 5) - hash) + str.charCodeAt(i);
-      hash |= 0;
-    }
-    return Math.abs(hash).toString(36);
-  }
-
-  function isValidToken(token) {
-    if (!token) return false;
-    var nowWindow = Math.floor(Date.now() / 60000); 
-    
-    var validNow = generateTimeToken(nowWindow);
-    var validPrev = generateTimeToken(nowWindow - 1);
-
-    return (token === validNow || token === validPrev);
+    statusInfo.textContent = "✅ Verification complete. Click GENERATE KEY below to proceed.";
   }
 
   function init() {
     var params = new URLSearchParams(window.location.search);
-    var token = params.get('token') || params.get('pass');
+    var versionParam = params.get('v');
+    var isWaitingShortlink = localStorage.getItem('waiting_shortlink');
     var isAdmin = params.get('admin');
 
     if (isAdmin === 'true' || isAdmin === '1') {
       adminPanel.style.display = 'block';
     }
 
-    if (isValidToken(token)) {
+    // SYARAT KUNCI DIBUKA:
+    // User membawa parameter ?v=... DAN memiliki penanda 'waiting_shortlink' di browsernya
+    if (versionParam && isWaitingShortlink === 'true') {
+      // Langsung hapus penanda agar URL tidak bisa di-refresh untuk klaim berulang
+      localStorage.removeItem('waiting_shortlink');
+      
+      // Bersihkan parameter dari URL browser
       if (window.history && window.history.replaceState) {
         window.history.replaceState({}, document.title, window.location.pathname);
       }
       
-      var usedTokenKey = "used_tok_" + token;
-      if (localStorage.getItem(usedTokenKey)) {
-        statusInfo.textContent = "⚠️Link expired / already used!⚠️";
-        checkDeviceExistingKey();
-        return;
-      }
-      
-      localStorage.setItem(usedTokenKey, "1");
+      // Panggil fungsi pembuat key
       handleUserGetNewKey();
     } else {
+      // Jika tidak memenuhi syarat, cek apakah HP user sudah punya key aktif sebelumnya
       checkDeviceExistingKey();
     }
   }
@@ -189,7 +169,7 @@
   }
 
   function createNewKeyInFirebase(customName, hours) {
-    statusInfo.textContent = "⚙️ Memverifikasi token & membuat key...";
+    statusInfo.textContent = "⚙️ Memverifikasi data & membuat key...";
     var randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     var newKey = customName ? customName.trim() : ("BX-" + randomCode);
     var now = Date.now();
@@ -217,13 +197,16 @@
   function showActiveKey(key, durationText) {
     keyDisplay.textContent = key;
     keyTimer.textContent = "Masa Aktif: " + durationText;
-    statusInfo.textContent = "✅Key successfully generated! Copy and paste the key into APKMODS✅";
+    statusInfo.textContent = "✅ Key successfully generated! Copy and paste the key into APKMODS.";
     turnstileBox.style.display = "none";
     getBtn.style.display = "none";
     copyBtn.style.display = "block";
   }
 
   getBtn.onclick = function() {
+    // TANDAI BROWSER USER BAHWA MEREKA SEDANG MELEWATI SHORTLINK
+    localStorage.setItem('waiting_shortlink', 'true');
+
     var todayStr = new Date().toISOString().slice(0, 10);
     var usedHistory = JSON.parse(localStorage.getItem('used_links_history') || '{}');
     
@@ -249,13 +232,14 @@
     usedHistory.links.push(targetUrl);
     localStorage.setItem('used_links_history', JSON.stringify(usedHistory));
 
-    window.open(targetUrl, '_blank');
+    // Pindah ke shortlink di tab saat ini agar tidak terblokir pop-up blocker HP
+    window.location.href = targetUrl;
   };
 
   copyBtn.onclick = function() {
     navigator.clipboard.writeText(keyDisplay.textContent);
-    copyBtn.textContent = "✅Successfully copy!";
-    setTimeout(() => { copyBtn.textContent = "📋 SALIN KEY"; }, 2000);
+    copyBtn.textContent = "✅ Successfully copied!";
+    setTimeout(() => { copyBtn.textContent = "📋 COPY KEY"; }, 2000);
   };
 
   document.getElementById('btnAdminGen').onclick = function() {
