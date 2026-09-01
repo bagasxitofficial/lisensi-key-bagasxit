@@ -18,7 +18,6 @@
     .btn-copy { background: #10B981; display: none; }
     .info { color: #8E8AA7; font-size: 13px; margin-top: 15px; }
     
-    /* CONTAINER CUSTOM CLOUDFLARE TURNSTILE */
     .turnstile-box {
       background: #0F0B21;
       border: 1px solid #3B2D6B;
@@ -31,7 +30,6 @@
       box-shadow: 0 4px 15px rgba(168, 85, 247, 0.1);
     }
 
-    /* PANEL ADMIN WEB TERSEMBUNYI */
     .admin-panel { display: none; margin-top: 25px; padding-top: 20px; border-top: 1px dashed #3B2D6B; text-align: left; }
     .admin-panel h3 { color: #A855F7; font-size: 14px; margin-bottom: 10px; text-align: center; }
     .admin-input { width: 100%; padding: 10px; margin-bottom: 10px; background: #0F0B21; border: 1px solid #3B2D6B; border-radius: 8px; color: #fff; font-size: 12px; }
@@ -39,7 +37,6 @@
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-  <!-- SCRIPT CLOUDFLARE TURNSTILE -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
@@ -54,7 +51,6 @@
     <div style="color:#8E8AA7; font-size:12px;" id="keyTimer">Status: Lewati verifikasi & shortlink untuk klaim key</div>
   </div>
 
-  <!-- WIDGET CAPTCHA CLOUDFLARE TURNSTILE (DARK THEME) -->
   <div class="turnstile-box" id="turnstileBox">
     <div class="cf-turnstile" 
          data-sitekey="0x4AAAAAAEj14KP8CTCRFU1x" 
@@ -68,7 +64,6 @@
 
   <div class="info" id="statusInfo">Please complete the security verification above.</div>
 
-  <!-- PANEL ADMIN WEB TERSEMBUNYI -->
   <div class="admin-panel" id="adminPanel">
     <h3>👑 WEB ADMIN PANEL</h3>
     <input type="text" id="customKey" class="admin-input" placeholder="Custom Key (Opsional / Kosongkan utk Auto)">
@@ -82,7 +77,6 @@
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   var db = firebase.database();
 
-  // DAFTAR SHORTLINK MOVE2LINK KAMU
   var SHORTLINK_URLS = [
     'https://move2link.co/d6e38d7',
     'https://move2link.co/74b15b4',
@@ -102,7 +96,6 @@
   var adminPanel = document.getElementById('adminPanel');
   var turnstileBox = document.getElementById('turnstileBox');
 
-  // CALLBACK KETIKA USER LOLOS CLOUDFLARE TURNSTILE
   function onTurnstileSuccess(token) {
     turnstileBox.style.display = "none";
     getBtn.style.display = "block";
@@ -111,24 +104,30 @@
 
   function init() {
     var params = new URLSearchParams(window.location.search);
-    var versionParam = params.get('v'); // Mendeteksi ?v=1, ?v=2, ?v=4, dst.
-    var tokenParam = params.get('token') || params.get('pass');
+    var versionParam = params.get('v');
+    var isWaiting = localStorage.getItem('waiting_shortlink');
     var isAdmin = params.get('admin');
+
+    // PENGECEKAN REFERRER: Memastikan asal usul pengakses berasal dari Move2link
+    var referrer = document.referrer.toLowerCase();
+    var isFromMove2link = referrer.includes('move2link');
 
     if (isAdmin === 'true' || isAdmin === '1') {
       adminPanel.style.display = 'block';
     }
 
-    // JIKA USER KEMBALI DENGAN PARAMETER Shortlink (?v=1..1000)
-    if (versionParam || tokenParam) {
+    // SYARAT GENERATE KEY:
+    // Punya parameter ?v= DAN (Memiliki LocalStorage Session ATAU Memang Datang Langsung dari Move2link)
+    if (versionParam && (isWaiting || isFromMove2link)) {
+      localStorage.removeItem('waiting_shortlink');
+
       if (window.history && window.history.replaceState) {
         window.history.replaceState({}, document.title, window.location.pathname);
       }
       
-      // LANGSUNG MEMPROSES / MENAMPILKAN KEY
       handleUserGetNewKey();
     } else {
-      // Jika URL polos tanpa ?v=, cek apakah di HP user ada key aktif
+      // Jika ditembak manual tanpa rujukan Move2link/Session, kunci ditegakkan
       checkDeviceExistingKey();
     }
   }
@@ -199,6 +198,8 @@
   }
 
   getBtn.onclick = function() {
+    localStorage.setItem('waiting_shortlink', Date.now().toString());
+
     var todayStr = new Date().toISOString().slice(0, 10);
     var usedHistory = JSON.parse(localStorage.getItem('used_links_history') || '{}');
     
@@ -224,7 +225,6 @@
     usedHistory.links.push(targetUrl);
     localStorage.setItem('used_links_history', JSON.stringify(usedHistory));
 
-    // MENGARAHKAN LANGSUNG DI TAB SAAT INI AGAR TIDAK DIBLOKIR BROWSER HP
     window.location.href = targetUrl;
   };
 
