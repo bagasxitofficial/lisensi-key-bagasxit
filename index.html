@@ -230,10 +230,13 @@
         return Object.assign({ id: k }, data[k]);
       });
 
-      var validKeys = keysList.filter(function(k) {
-        return k.is_active === true || k.status === 'ACTIVE' || k.is_active === "true";
+      var now = Date.now();
+     var validKeys = keysList.filter(function(k) {
+     var isActive = (k.is_active === true || k.status === 'ACTIVE' || k.is_active === "true");
+      var notExpired = !k.expires_at || k.expires_at > now;
+      return isActive && notExpired;
       });
-
+      
       if (validKeys.length === 0) {
         if (isUnlocked) renderFallbackKey();
         return;
