@@ -17,6 +17,12 @@
     .btn { width: 100%; padding: 14px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; background: #A855F7; color: #fff; font-size: 14px; margin-top: 10px; }
     .btn-copy { background: #10B981; display: none; }
     .info { color: #8E8AA7; font-size: 13px; margin-top: 15px; }
+    
+    /* PANEL ADMIN WEB (TERSEMBUNYI) */
+    .admin-panel { display: none; margin-top: 25px; padding-top: 20px; border-top: 1px dashed #3B2D6B; text-align: left; }
+    .admin-panel h3 { color: #A855F7; font-size: 14px; margin-bottom: 10px; text-align: center; }
+    .admin-input { width: 100%; padding: 10px; margin-bottom: 10px; background: #0F0B21; border: 1px solid #3B2D6B; border-radius: 8px; color: #fff; font-size: 12px; }
+    .btn-admin { background: #10B981; color: #fff; padding: 10px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; font-size: 12px; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
@@ -36,7 +42,15 @@
   <button class="btn" id="getBtn">🔗 GET KEY (SHORTLINK)</button>
   <button class="btn btn-copy" id="copyBtn">📋 SALIN KEY</button>
 
-  <div class="info" id="statusInfo">Klik tombol di atas untuk mengambil lisensi 24 Jam.</div>
+  <div class="info" id="statusInfo">Klik tombol di atas untuk mengambil lisensi 5 Jam.</div>
+
+  <!-- PANEL ADMIN WEB TERSEMBUNYI -->
+  <div class="admin-panel" id="adminPanel">
+    <h3>👑 WEB ADMIN PANEL</h3>
+    <input type="text" id="customKey" class="admin-input" placeholder="Custom Key (Opsional / Kosongkan utk Auto)">
+    <input type="number" id="customHours" class="admin-input" placeholder="Durasi (Jam)" value="5">
+    <button class="btn-admin" id="btnAdminGen">⚡ GENERATE KEY ADMIN</button>
+  </div>
 </div>
 
 <script>
@@ -44,20 +58,32 @@
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   var db = firebase.database();
 
-  var SHORTLINK_URLS = ['https://move2link.co/ac512ac', 'https://move2link.co/959a72b'];
+  // LIST SHORTLINK UNTUK ROTASI CPM MAKSIMAL
+  var SHORTLINK_URLS = [
+    'https://move2link.co/ac512ac',
+    'https://move2link.co/959a72b'
+  ];
+  
   var VALID_PASSKEY = 'BAGASXIT2026';
+  var DURATION_HOURS = 5; // DITETAPKAN 5 JAM
 
   var keyDisplay = document.getElementById('keyDisplay');
   var keyTimer = document.getElementById('keyTimer');
   var getBtn = document.getElementById('getBtn');
   var copyBtn = document.getElementById('copyBtn');
   var statusInfo = document.getElementById('statusInfo');
+  var adminPanel = document.getElementById('adminPanel');
 
   function init() {
     var params = new URLSearchParams(window.location.search);
     var pass = params.get('pass') || params.get('unlocked');
+    var isAdmin = params.get('admin');
 
-    // Hapus Passkey dari URL Bar agar aman
+    // AKTIFKAN PANEL ADMIN JIKA URL MENGGUNAKAN ?admin=true
+    if (isAdmin === 'true' || isAdmin === '1') {
+      adminPanel.style.display = 'block';
+    }
+
     if (pass === VALID_PASSKEY || pass === 'true') {
       if (window.history && window.history.replaceState) {
         window.history.replaceState({}, document.title, window.location.pathname);
@@ -74,7 +100,7 @@
       db.ref('keys/' + savedKey).once('value').then(function(snap) {
         var data = snap.val();
         if (data && data.expires_at > Date.now() && data.is_active) {
-          showActiveKey(savedKey, "24 Jam (Aktif)");
+          showActiveKey(savedKey, DURATION_HOURS + " Jam (Aktif)");
         } else {
           localStorage.removeItem('bagasxit_user_key');
         }
@@ -88,38 +114,39 @@
       db.ref('keys/' + savedKey).once('value').then(function(snap) {
         var data = snap.val();
         if (data && data.expires_at > Date.now() && data.is_active) {
-          showActiveKey(savedKey, "24 Jam (Aktif)");
+          showActiveKey(savedKey, DURATION_HOURS + " Jam (Aktif)");
           return;
         }
-        createNewKeyInFirebase();
+        createNewKeyInFirebase(null, DURATION_HOURS);
       });
     } else {
-      createNewKeyInFirebase();
+      createNewKeyInFirebase(null, DURATION_HOURS);
     }
   }
 
-  function createNewKeyInFirebase() {
+  function createNewKeyInFirebase(customName, hours) {
     statusInfo.textContent = "⚙️ Membuat key unik baru...";
     var randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    var newKey = "BX-" + randomCode;
+    var newKey = customName ? customName.trim() : ("BX-" + randomCode);
     var now = Date.now();
-    var durationMs = 24 * 3600 * 1000; // 24 Jam
+    var durationMs = hours * 3600 * 1000;
 
-    // SINKRON SAMA DENGAN STRUKTUR SKETCHWARE ADMIN
     var payload = {
       key: newKey,
       created_at: now,
       expires_at: now + durationMs,
       duration_ms: durationMs,
-      expires_at_str: "24 Jam (Aktif)",
+      expires_at_str: hours + " Jam (Aktif)",
       is_active: true,
       hwid: "",
-      assigned_to: "Web Auto-Gen"
+      assigned_to: customName ? "Admin Web" : "Web Auto-Gen"
     };
 
     db.ref('keys/' + newKey).set(payload).then(function() {
-      localStorage.setItem('bagasxit_user_key', newKey);
-      showActiveKey(newKey, "24 Jam (Aktif)");
+      if (!customName) {
+        localStorage.setItem('bagasxit_user_key', newKey);
+      }
+      showActiveKey(newKey, hours + " Jam (Aktif)");
     });
   }
 
@@ -131,15 +158,30 @@
     copyBtn.style.display = "block";
   }
 
+  // TRIK BYPASS BOT & OPTIMASI CPM MOVE2LINK
   getBtn.onclick = function() {
     var randIndex = Math.floor(Math.random() * SHORTLINK_URLS.length);
-    window.open(SHORTLINK_URLS[randIndex], '_blank');
+    var baseUrl = SHORTLINK_URLS[randIndex];
+    
+    // Tambahkan parameter acak di akhir URL agar unik & terhitung sebagai Unique Click oleh ad-network
+    var randomParam = "?ref=" + Math.random().toString(36).substring(7);
+    var targetUrl = baseUrl + randomParam;
+    
+    window.open(targetUrl, '_blank');
   };
 
   copyBtn.onclick = function() {
     navigator.clipboard.writeText(keyDisplay.textContent);
     copyBtn.textContent = "✅ TERKOPY!";
     setTimeout(() => { copyBtn.textContent = "📋 SALIN KEY"; }, 2000);
+  };
+
+  // TOMBOL ADMIN MANUAL GENERATE
+  document.getElementById('btnAdminGen').onclick = function() {
+    var cKey = document.getElementById('customKey').value;
+    var cHours = parseFloat(document.getElementById('customHours').value) || 5;
+    createNewKeyInFirebase(cKey, cHours);
+    alert("Key Admin Berhasil Dibuat!");
   };
 
   init();
