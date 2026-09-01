@@ -67,9 +67,9 @@
     @media (max-width: 500px) { .container { padding: 30px 18px; } .key-box .key-value { font-size: 20px; } .btn-group { flex-direction: column; } .btn { width: 100%; } }
   </style>
 
-  <!-- FIREBASE SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 </head>
 <body>
 
@@ -135,7 +135,7 @@
 
 <script>
   // ==============================================
-  // KONFIGURASI DATABASE FIREBASE
+  // KONFIGURASI FIREBASE
   // ==============================================
   var firebaseConfig = {
     databaseURL: "https://bagasxit-official-default-rtdb.firebaseio.com"
@@ -144,16 +144,19 @@
     firebase.initializeApp(firebaseConfig);
   }
   var db = firebase.database();
+  var auth = firebase.auth();
 
-  // LINK SHORTLINK KAMU
-  var MOVE2LINK_LIST = [
-    'https://move2link.co/ac512ac',
-    'https://move2link.co/959a72b'
-  ];
-  
-  var VALID_PASSKEY = 'BAGASXIT2026'; // Passkey pengenal Shortlink
+  // ==============================================
+  // AUTH ANONIM (WAJIB)
+  // ==============================================
+  auth.signInAnonymously().catch(function(err) {
+    console.warn('Auth error:', err);
+    document.getElementById('statusText').textContent = '⚠️ AUTH GAGAL';
+  });
 
-  // DOM ELEMENTS
+  // ==============================================
+  // DOM REFS
+  // ==============================================
   var keyDisplay = document.getElementById('keyDisplay');
   var keyExpiry = document.getElementById('keyExpiry');
   var keyStatus = document.getElementById('keyStatus');
@@ -181,6 +184,14 @@
 
   var currentSelectedKey = null;
 
+  // ==============================================
+  // SHORTLINK LIST
+  // ==============================================
+  var MOVE2LINK_LIST = [
+    'https://move2link.co/ac512ac',
+    'https://move2link.co/959a72b'
+  ];
+
   function showMessage(msg, type) {
     messageBox.textContent = msg;
     messageBox.className = 'message-box ' + (type || 'info');
@@ -189,21 +200,26 @@
   }
 
   // ==============================================
-  // SISTEM BUKA KEY + ANTI-BOCOR URL
+  // SISTEM TOKEN SEKALI PAKAI (GANTI PASSKEY)
   // ==============================================
-  function checkPasskeyAndUnlock() {
+  function checkTokenAndUnlock() {
     var urlParams = new URLSearchParams(window.location.search);
-    var pass = urlParams.get('pass') || urlParams.get('unlocked');
+    var token = urlParams.get('token');
 
-    if (pass === VALID_PASSKEY || pass === 'true') {
-      showMessage('🎉 Berhasil melewati Shortlink! Kunci Terbuka.', 'success');
-      
-      // HAPUS PARAMETER SEMENTARA DARI ADDRESS BAR HP (ANTI-BOCOR LINK)
-      if (window.history && window.history.replaceState) {
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-      
-      loadPublicKeyFromFirebase(true);
+    if (token) {
+      db.ref('shortlink_tokens/' + token).once('value').then(function(snap) {
+        if (snap.exists() && snap.val().used === false) {
+          db.ref('shortlink_tokens/' + token).update({ used: true, used_at: Date.now() });
+          showMessage('🎉 Token valid! Key terbuka.', 'success');
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+          loadPublicKeyFromFirebase(true);
+        } else {
+          showMessage('❌ Token tidak valid atau sudah dipakai.', 'error');
+          showLockedState();
+        }
+      }).catch(function() { showLockedState(); });
     } else {
       showLockedState();
       loadPublicKeyFromFirebase(false);
@@ -218,38 +234,36 @@
     copyBtn.style.display = 'none';
   }
 
+  // ==============================================
+  // LOAD KEY DARI FIREBASE + AUTO DELETE EXPIRED
+  // ==============================================
   function loadPublicKeyFromFirebase(isUnlocked) {
     db.ref('keys').limitToLast(10).once('value').then(function(snapshot) {
       var data = snapshot.val();
-      if (!data) {
-        if (isUnlocked) renderFallbackKey();
-        return;
-      }
+      if (!data) { if (isUnlocked) renderFallbackKey(); return; }
 
-      var keysList = Object.keys(data).map(function(k) {
-        return Object.assign({ id: k }, data[k]);
-      });
-
+      var keysList = Object.keys(data).map(function(k) { return Object.assign({ id: k }, data[k]); });
       var now = Date.now();
-     var validKeys = keysList.filter(function(k) {
-     var isActive = (k.is_active === true || k.status === 'ACTIVE' || k.is_active === "true");
-      var notExpired = !k.expires_at || k.expires_at > now;
-      return isActive && notExpired;
+
+      // Auto delete expired key (lebih 1 jam)
+      var expiredKeys = keysList.filter(function(k) {
+        return k.expires_at && (now > k.expires_at + 3600000);
       });
-      
-      if (validKeys.length === 0) {
-        if (isUnlocked) renderFallbackKey();
-        return;
-      }
+      expiredKeys.forEach(function(k) {
+        db.ref('keys/' + k.id).remove();
+      });
+
+      var validKeys = keysList.filter(function(k) {
+        var isActive = (k.is_active === true || k.status === 'ACTIVE' || k.is_active === "true");
+        var notExpired = !k.expires_at || k.expires_at > now;
+        return isActive && notExpired;
+      });
+
+      if (validKeys.length === 0) { if (isUnlocked) renderFallbackKey(); return; }
 
       currentSelectedKey = validKeys[validKeys.length - 1];
-
-      if (isUnlocked) {
-        renderKey(currentSelectedKey);
-      }
-    }).catch(function(err) {
-      if (isUnlocked) renderFallbackKey();
-    });
+      if (isUnlocked) renderKey(currentSelectedKey);
+    }).catch(function(err) { if (isUnlocked) renderFallbackKey(); });
   }
 
   function renderKey(keyData) {
@@ -272,13 +286,16 @@
   }
 
   // ==============================================
-  // RESPONS TOMBOL-TOMBOL
+  // TOMBOL SHORTLINK
   // ==============================================
   shortlinkBtn.onclick = function() {
     var randomIndex = Math.floor(Math.random() * MOVE2LINK_LIST.length);
     window.open(MOVE2LINK_LIST[randomIndex], '_blank');
   };
 
+  // ==============================================
+  // ADMIN LOGIN (CEK NODE ADMINS)
+  // ==============================================
   adminBtn.onclick = function() {
     publicView.style.display = 'none';
     loginView.style.display = 'block';
@@ -286,13 +303,9 @@
     modeLabel.textContent = '🔐 Admin Access';
   };
 
-  backToPublicBtn.onclick = function() {
-    goToPublicView();
-  };
-
-  backToPublicFromAdmin.onclick = function() {
-    goToPublicView();
-  };
+  backToPublicBtn.onclick = function() { goToPublicView(); };
+  backToPublicFromAdmin.onclick = function() { goToPublicView(); };
+  logoutBtn.onclick = function() { goToPublicView(); };
 
   function goToPublicView() {
     publicView.style.display = 'block';
@@ -301,25 +314,29 @@
     modeLabel.textContent = 'Bypass Shortlink untuk mendapatkan Key Asli';
   }
 
-  // LOGOUT ADMIN
-  logoutBtn.onclick = function() {
-    goToPublicView();
-  };
-
-  // LOGIN ADMIN CONTROL
   loginBtn.onclick = function() {
     var u = loginUser.value.trim();
     var p = loginPass.value.trim();
+    if (!u || !p) { loginError.style.display = 'block'; return; }
 
-    if (u === "admin" && p === "BAGASXIT2026") {
-      loginError.style.display = 'none';
-      loginView.style.display = 'none';
-      adminView.style.display = 'block';
-      modeLabel.textContent = '📋 Admin Panel · Realtime Database';
-      loadAdminKeys();
-    } else {
-      loginError.style.display = 'block';
-    }
+    db.ref('admins').orderByChild('username').equalTo(u).once('value').then(function(snap) {
+      if (snap.exists()) {
+        var found = false;
+        snap.forEach(function(child) {
+          if (child.val().password === p) {
+            found = true;
+            loginError.style.display = 'none';
+            loginView.style.display = 'none';
+            adminView.style.display = 'block';
+            modeLabel.textContent = '📋 Admin Panel · Realtime Database';
+            loadAdminKeys();
+          }
+        });
+        if (!found) loginError.style.display = 'block';
+      } else {
+        loginError.style.display = 'block';
+      }
+    }).catch(function() { loginError.style.display = 'block'; });
   };
 
   function loadAdminKeys() {
@@ -345,7 +362,9 @@
     });
   }
 
-  // COPY KEY FUNCTION
+  // ==============================================
+  // COPY KEY
+  // ==============================================
   copyBtn.onclick = function() {
     var text = keyDisplay.textContent;
     if (text.includes('LOCKED')) return;
@@ -356,8 +375,10 @@
     });
   };
 
-  // INITIAL LOAD
-  checkPasskeyAndUnlock();
+  // ==============================================
+  // INIT
+  // ==============================================
+  checkTokenAndUnlock();
 </script>
 </body>
 </html>
