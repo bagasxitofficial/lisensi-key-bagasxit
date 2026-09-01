@@ -187,10 +187,34 @@
   }
 
   getBtn.onclick = function() {
+  var todayStr = new Date().toISOString().slice(0, 10);
+  var usedHistory = JSON.parse(localStorage.getItem('used_links_history') || '{}');
+  
+  if (usedHistory.date !== todayStr) {
+    usedHistory = { date: todayStr, links: [] };
+  }
+
+  var unusedLinks = SHORTLINK_URLS.filter(function(link) {
+    return !usedHistory.links.includes(link);
+  });
+
+  var targetUrl = "";
+
+  if (unusedLinks.length > 0) {
+    var randIndex = Math.floor(Math.random() * unusedLinks.length);
+    targetUrl = unusedLinks[randIndex];
+  } else {
+    usedHistory.links = [];
     var randIndex = Math.floor(Math.random() * SHORTLINK_URLS.length);
-    var baseUrl = SHORTLINK_URLS[randIndex];
-    window.open(baseUrl, '_blank');
-  };
+    targetUrl = SHORTLINK_URLS[randIndex];
+  }
+
+  usedHistory.links.push(targetUrl);
+  localStorage.setItem('used_links_history', JSON.stringify(usedHistory));
+
+  window.open(targetUrl, '_blank');
+};
+
 
   copyBtn.onclick = function() {
     navigator.clipboard.writeText(keyDisplay.textContent);
