@@ -1,360 +1,148 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BAGASXIT · KEY GENERATOR</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <title>BAGASXIT · OFFICIAL KEY SYSTEM</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Courier New', monospace; }
-    body { background: #0B0822; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .container {
-      max-width: 800px; width: 100%;
-      background: linear-gradient(145deg, #120F24, #1A153B);
-      border-radius: 40px; padding: 40px 30px;
-      border: 1px solid rgba(168, 85, 247, 0.35);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(168, 85, 247, 0.08);
-      position: relative; overflow: hidden;
-    }
-    .container::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(168,85,247,0.05), transparent 70%); pointer-events: none; }
-    .badge { display: inline-block; background: rgba(168,85,247,0.15); color: #A855F7; font-size: 11px; font-weight: 700; letter-spacing: 2px; padding: 6px 18px; border-radius: 30px; text-transform: uppercase; border: 1px solid rgba(168,85,247,0.2); margin-bottom: 20px; }
-    h1 { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: 1px; margin-bottom: 6px; }
-    h1 span { background: linear-gradient(135deg, #A855F7, #D946EF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .subhead { color: #8E8AA7; font-size: 14px; margin-bottom: 30px; border-left: 3px solid #A855F7; padding-left: 16px; font-weight: 300; }
-    .status-bar { display: flex; justify-content: space-between; align-items: center; background: #0B0822; border-radius: 20px; padding: 12px 20px; margin-bottom: 30px; border: 1px solid #2A1F4A; }
-    .status-bar .label { color: #8E8AA7; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-    .status-bar .value { color: #10B981; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-    .status-bar .value::before { content: ''; display: inline-block; width: 8px; height: 8px; background: #10B981; border-radius: 50%; animation: pulse 1.5s infinite; }
-    .status-bar .value.warning { color: #F59E0B; }
-    .status-bar .value.warning::before { background: #F59E0B; }
-    .status-bar .value.error { color: #EF4444; }
-    .status-bar .value.error::before { background: #EF4444; }
-    @keyframes pulse { 0% { opacity: 0.4; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.2); } 100% { opacity: 0.4; transform: scale(0.9); } }
-    .key-box { background: #0B0822; border-radius: 24px; padding: 28px 24px; border: 1px solid #2A1F4A; margin-bottom: 28px; transition: 0.3s; position: relative; }
-    .key-box .key-label { color: #8E8AA7; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 6px; }
-    .key-box .key-value { font-size: 28px; font-weight: 700; font-family: 'Courier New', monospace; color: #fff; letter-spacing: 1.5px; word-break: break-all; }
-    .key-box .key-expiry { margin-top: 10px; font-size: 13px; color: #8E8AA7; }
-    .key-box .key-expiry strong { color: #F59E0B; }
-    .key-box .key-status { position: absolute; top: 20px; right: 24px; font-size: 13px; font-weight: 700; padding: 4px 14px; border-radius: 30px; background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.2); }
-    .key-box .key-status.expired { background: rgba(239, 68, 68, 0.15); color: #EF4444; border-color: rgba(239, 68, 68, 0.2); }
-    .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 30px; }
-    .btn { flex: 1; min-width: 120px; padding: 16px 20px; border-radius: 60px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; user-select: none; }
-    .btn-primary { background: linear-gradient(135deg, #A855F7, #7C3AED); color: #fff; box-shadow: 0 4px 20px rgba(168,85,247,0.25); }
-    .btn-primary:hover, .btn-primary:active { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(168,85,247,0.4); }
-    .btn-secondary { background: #1A153B; color: #A855F7; border: 1px solid #3B2D6B; }
-    .btn-secondary:hover, .btn-secondary:active { background: #2A1F4A; }
-    .btn-copy { background: #0B0822; color: #A855F7; border: 1px solid #2A1F4A; flex: 0.5; }
-    .btn-copy:hover, .btn-copy:active { background: #1A153B; }
-    .btn-success { background: #10B981; color: #fff; }
-    .footer { text-align: center; color: #4B456B; font-size: 12px; border-top: 1px solid #1A153B; padding-top: 20px; margin-top: 10px; }
-    .message-box { text-align: center; padding: 10px; border-radius: 12px; margin-bottom: 20px; background: rgba(168,85,247,0.08); color: #A855F7; border: 1px solid rgba(168,85,247,0.15); font-size: 14px; display: none; }
-    .message-box.warning { background: rgba(245,158,11,0.1); color: #F59E0B; border-color: rgba(245,158,11,0.2); }
-    .message-box.error { background: rgba(239,68,68,0.1); color: #EF4444; border-color: rgba(239,68,68,0.2); }
-    .message-box.success { background: rgba(16,185,129,0.1); color: #10B981; border-color: rgba(16,185,129,0.2); }
-
-    .login-form { display: none; margin-bottom: 30px; }
-    .login-form input { width: 100%; padding: 16px 20px; margin-bottom: 14px; background: #0B0822; border: 1px solid #2A1F4A; border-radius: 16px; color: #fff; font-size: 16px; outline: none; }
-    .login-form input:focus { border-color: #A855F7; }
-    .login-form .error-msg { color: #EF4444; font-size: 14px; margin-top: 10px; display: none; }
-
-    .admin-panel { display: none; margin-top: 20px; }
-    .admin-panel table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .admin-panel th { text-align: left; padding: 12px 10px; color: #8E8AA7; border-bottom: 1px solid #2A1F4A; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
-    .admin-panel td { padding: 10px; border-bottom: 1px solid #1A153B; color: #fff; }
-    .admin-panel td .status-badge { font-size: 11px; padding: 2px 12px; border-radius: 20px; background: rgba(16,185,129,0.15); color: #10B981; }
-    .admin-panel td .status-badge.inactive { background: rgba(239,68,68,0.15); color: #EF4444; }
-    .admin-panel .key-count { color: #8E8AA7; font-size: 14px; margin-bottom: 16px; }
-    .admin-panel .key-count strong { color: #A855F7; }
-    @media (max-width: 500px) { .container { padding: 30px 18px; } .key-box .key-value { font-size: 20px; } .btn-group { flex-direction: column; } .btn { width: 100%; } }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', monospace; }
+    body { background: #0F0B21; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .container { max-width: 500px; width: 100%; background: #1A153B; border-radius: 24px; padding: 30px; border: 1px solid #3B2D6B; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+    .badge { background: rgba(168,85,247,0.15); color: #A855F7; font-size: 11px; font-weight: 700; padding: 6px 16px; border-radius: 20px; display: inline-block; margin-bottom: 15px; border: 1px solid rgba(168,85,247,0.2); }
+    h1 { color: #fff; font-size: 24px; margin-bottom: 20px; font-weight: 800; }
+    h1 span { color: #A855F7; }
+    .key-box { background: #0F0B21; border-radius: 16px; padding: 24px; border: 1px solid #3B2D6B; margin-bottom: 20px; }
+    .key-value { font-size: 26px; font-weight: 700; color: #10B981; letter-spacing: 2px; word-break: break-all; margin: 12px 0; }
+    .btn { width: 100%; padding: 14px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; background: #A855F7; color: #fff; font-size: 14px; margin-top: 10px; }
+    .btn-copy { background: #10B981; display: none; }
+    .info { color: #8E8AA7; font-size: 13px; margin-top: 15px; }
   </style>
-
-  <!-- FIREBASE SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 </head>
 <body>
 
 <div class="container">
-  <div class="badge">⚡ BAGASXIT · GENERATOR</div>
-  <h1><span>BAGASXIT</span> KEY</h1>
-  <div class="subhead" id="modeLabel">Bypass Shortlink untuk mendapatkan Key Asli</div>
+  <div class="badge">⚡ OFFICIAL GENERATOR</div>
+  <h1><span>BAGASXIT</span> KEY SYSTEM</h1>
 
-  <div class="status-bar">
-    <span class="label">🔐 NODE STATUS</span>
-    <span class="value" id="statusText">AUTH / READY</span>
+  <div class="key-box">
+    <div style="color:#8E8AA7; font-size:12px;">LISENSI ANDA:</div>
+    <div class="key-value" id="keyDisplay">LOCKED 🔒</div>
+    <div style="color:#8E8AA7; font-size:12px;" id="keyTimer">Status: Lewati shortlink untuk klaim key</div>
   </div>
 
-  <div id="messageBox" class="message-box"></div>
+  <button class="btn" id="getBtn">🔗 GET KEY (SHORTLINK)</button>
+  <button class="btn btn-copy" id="copyBtn">📋 SALIN KEY</button>
 
-  <!-- PUBLIC: KEY DISPLAY -->
-  <div id="publicView">
-    <div class="key-box" id="keyBox">
-      <div class="key-label">📋 YOUR ACCESS KEY</div>
-      <div class="key-value" id="keyDisplay">LOCKED 🔒</div>
-      <div class="key-expiry" id="keyExpiry">⏳ Silakan lewati Shortlink untuk membuka Key.</div>
-      <div class="key-status expired" id="keyStatus">🔒 LOCKED</div>
-    </div>
-
-    <div class="btn-group">
-      <button class="btn btn-primary" id="shortlinkBtn" type="button">🔗 GET KEY (SHORTLINK)</button>
-      <button class="btn btn-copy" id="copyBtn" type="button" style="display:none;">📋 COPY</button>
-      <button class="btn btn-secondary" id="adminBtn" type="button">⚙️ ADMIN</button>
-    </div>
-  </div>
-
-  <!-- LOGIN FORM -->
-  <div id="loginView" class="login-form">
-    <h3 style="color:#fff; margin-bottom:20px; font-weight:600;">🔐 ADMIN ACCESS</h3>
-    <input type="text" id="loginUser" placeholder="Username Admin" autocomplete="off" />
-    <input type="password" id="loginPass" placeholder="Password" />
-    <button class="btn btn-primary" id="loginBtn" type="button">🔓 LOGIN</button>
-    <div id="loginError" class="error-msg">❌ Username atau password salah!</div>
-    <button class="btn btn-secondary" id="backToPublicBtn" type="button" style="margin-top:12px;">← Kembali ke Generator</button>
-  </div>
-
-  <!-- ADMIN PANEL -->
-  <div id="adminView" class="admin-panel">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-      <div class="key-count">📋 Total Database: <strong id="adminKeyCount">0</strong> keys</div>
-      <button class="btn btn-secondary" id="logoutBtn" type="button" style="padding:8px 16px; min-width:80px;">🚪 LOGOUT</button>
-    </div>
-    <div style="overflow-x:auto;">
-      <table>
-        <thead>
-          <tr><th>Key</th><th>Status</th><th>Expires</th><th>HWID Device</th></tr>
-        </thead>
-        <tbody id="adminTableBody"></tbody>
-      </table>
-    </div>
-    <button class="btn btn-secondary" id="backToPublicFromAdmin" type="button" style="margin-top:16px;">← Kembali ke Generator</button>
-  </div>
-
-  <div class="footer">
-    © BAGASXIT · System Online
-  </div>
+  <div class="info" id="statusInfo">Klik tombol di atas untuk mengambil lisensi 24 Jam.</div>
 </div>
 
 <script>
-  // ==============================================
-  // KONFIGURASI DATABASE FIREBASE
-  // ==============================================
-  var firebaseConfig = {
-    databaseURL: "https://bagasxit-official-default-rtdb.firebaseio.com"
-  };
-  if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-  }
+  var firebaseConfig = { databaseURL: "https://bagasxit-official-default-rtdb.firebaseio.com" };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   var db = firebase.database();
 
-  // LINK SHORTLINK KAMU
-  var MOVE2LINK_LIST = [
-    'https://move2link.co/ac512ac',
-    'https://move2link.co/959a72b'
-  ];
-  
-  var VALID_PASSKEY = 'BAGASXIT2026'; // Passkey pengenal Shortlink
+  var SHORTLINK_URLS = ['https://move2link.co/ac512ac', 'https://move2link.co/959a72b'];
+  var VALID_PASSKEY = 'BAGASXIT2026';
 
-  // DOM ELEMENTS
   var keyDisplay = document.getElementById('keyDisplay');
-  var keyExpiry = document.getElementById('keyExpiry');
-  var keyStatus = document.getElementById('keyStatus');
-  var statusText = document.getElementById('statusText');
+  var keyTimer = document.getElementById('keyTimer');
+  var getBtn = document.getElementById('getBtn');
   var copyBtn = document.getElementById('copyBtn');
-  var shortlinkBtn = document.getElementById('shortlinkBtn');
-  var adminBtn = document.getElementById('adminBtn');
-  var messageBox = document.getElementById('messageBox');
-  var modeLabel = document.getElementById('modeLabel');
+  var statusInfo = document.getElementById('statusInfo');
 
-  var publicView = document.getElementById('publicView');
-  var loginView = document.getElementById('loginView');
-  var adminView = document.getElementById('adminView');
+  function init() {
+    var params = new URLSearchParams(window.location.search);
+    var pass = params.get('pass') || params.get('unlocked');
 
-  var loginUser = document.getElementById('loginUser');
-  var loginPass = document.getElementById('loginPass');
-  var loginBtn = document.getElementById('loginBtn');
-  var loginError = document.getElementById('loginError');
-  var backToPublicBtn = document.getElementById('backToPublicBtn');
-
-  var adminTableBody = document.getElementById('adminTableBody');
-  var adminKeyCount = document.getElementById('adminKeyCount');
-  var logoutBtn = document.getElementById('logoutBtn');
-  var backToPublicFromAdmin = document.getElementById('backToPublicFromAdmin');
-
-  var currentSelectedKey = null;
-
-  function showMessage(msg, type) {
-    messageBox.textContent = msg;
-    messageBox.className = 'message-box ' + (type || 'info');
-    messageBox.style.display = 'block';
-    setTimeout(function() { messageBox.style.display = 'none'; }, 4000);
-  }
-
-  // ==============================================
-  // SISTEM BUKA KEY + ANTI-BOCOR URL
-  // ==============================================
-  function checkPasskeyAndUnlock() {
-    var urlParams = new URLSearchParams(window.location.search);
-    var pass = urlParams.get('pass') || urlParams.get('unlocked');
-
+    // Hapus Passkey dari URL Bar agar aman
     if (pass === VALID_PASSKEY || pass === 'true') {
-      showMessage('🎉 Berhasil melewati Shortlink! Kunci Terbuka.', 'success');
-      
-      // HAPUS PARAMETER SEMENTARA DARI ADDRESS BAR HP (ANTI-BOCOR LINK)
       if (window.history && window.history.replaceState) {
         window.history.replaceState({}, document.title, window.location.pathname);
       }
-      
-      loadPublicKeyFromFirebase(true);
+      handleUserGetNewKey();
     } else {
-      showLockedState();
-      loadPublicKeyFromFirebase(false);
+      checkDeviceExistingKey();
     }
   }
 
-  function showLockedState() {
-    keyDisplay.textContent = 'LOCKED 🔒';
-    keyExpiry.innerHTML = '⏳ Klik <strong>GET KEY</strong> untuk lewati Shortlink.';
-    keyStatus.textContent = '🔒 LOCKED';
-    keyStatus.className = 'key-status expired';
-    copyBtn.style.display = 'none';
-  }
-
-  function loadPublicKeyFromFirebase(isUnlocked) {
-    db.ref('keys').limitToLast(10).once('value').then(function(snapshot) {
-      var data = snapshot.val();
-      if (!data) {
-        if (isUnlocked) renderFallbackKey();
-        return;
-      }
-
-      var keysList = Object.keys(data).map(function(k) {
-        return Object.assign({ id: k }, data[k]);
+  function checkDeviceExistingKey() {
+    var savedKey = localStorage.getItem('bagasxit_user_key');
+    if (savedKey) {
+      db.ref('keys/' + savedKey).once('value').then(function(snap) {
+        var data = snap.val();
+        if (data && data.expires_at > Date.now() && data.is_active) {
+          showActiveKey(savedKey, "24 Jam (Aktif)");
+        } else {
+          localStorage.removeItem('bagasxit_user_key');
+        }
       });
-
-      var validKeys = keysList.filter(function(k) {
-        return k.is_active === true || k.status === 'ACTIVE' || k.is_active === "true";
-      });
-
-      if (validKeys.length === 0) {
-        if (isUnlocked) renderFallbackKey();
-        return;
-      }
-
-      currentSelectedKey = validKeys[validKeys.length - 1];
-
-      if (isUnlocked) {
-        renderKey(currentSelectedKey);
-      }
-    }).catch(function(err) {
-      if (isUnlocked) renderFallbackKey();
-    });
-  }
-
-  function renderKey(keyData) {
-    if (!keyData) return;
-    var keyStr = keyData.key || keyData.id || 'BX-VIP2026';
-    keyDisplay.textContent = keyStr;
-    keyExpiry.innerHTML = '⏳ Expires: <strong>' + (keyData.expires_at_str || '24 Jam (Active)') + '</strong>';
-    keyStatus.textContent = '✅ UNLOCKED';
-    keyStatus.className = 'key-status';
-    copyBtn.style.display = 'inline-block';
-  }
-
-  function renderFallbackKey() {
-    currentSelectedKey = { key: "BAGASXIT-VIP2026" };
-    keyDisplay.textContent = currentSelectedKey.key;
-    keyExpiry.innerHTML = '⏳ Status: <strong>ACTIVE (24 Jam)</strong>';
-    keyStatus.textContent = '✅ UNLOCKED';
-    keyStatus.className = 'key-status';
-    copyBtn.style.display = 'inline-block';
-  }
-
-  // ==============================================
-  // RESPONS TOMBOL-TOMBOL
-  // ==============================================
-  shortlinkBtn.onclick = function() {
-    var randomIndex = Math.floor(Math.random() * MOVE2LINK_LIST.length);
-    window.open(MOVE2LINK_LIST[randomIndex], '_blank');
-  };
-
-  adminBtn.onclick = function() {
-    publicView.style.display = 'none';
-    loginView.style.display = 'block';
-    adminView.style.display = 'none';
-    modeLabel.textContent = '🔐 Admin Access';
-  };
-
-  backToPublicBtn.onclick = function() {
-    goToPublicView();
-  };
-
-  backToPublicFromAdmin.onclick = function() {
-    goToPublicView();
-  };
-
-  function goToPublicView() {
-    publicView.style.display = 'block';
-    loginView.style.display = 'none';
-    adminView.style.display = 'none';
-    modeLabel.textContent = 'Bypass Shortlink untuk mendapatkan Key Asli';
-  }
-
-  // LOGOUT ADMIN
-  logoutBtn.onclick = function() {
-    goToPublicView();
-  };
-
-  // LOGIN ADMIN CONTROL
-  loginBtn.onclick = function() {
-    var u = loginUser.value.trim();
-    var p = loginPass.value.trim();
-
-    if (u === "admin" && p === "BAGASXIT2026") {
-      loginError.style.display = 'none';
-      loginView.style.display = 'none';
-      adminView.style.display = 'block';
-      modeLabel.textContent = '📋 Admin Panel · Realtime Database';
-      loadAdminKeys();
-    } else {
-      loginError.style.display = 'block';
     }
-  };
+  }
 
-  function loadAdminKeys() {
-    db.ref('keys').once('value').then(function(snapshot) {
-      var data = snapshot.val();
-      if (!data) {
-        adminTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Database Kosong</td></tr>';
-        adminKeyCount.textContent = '0';
-        return;
-      }
-      var keysList = Object.keys(data).map(function(k) { return Object.assign({ id: k }, data[k]); });
-      var html = '';
-      keysList.forEach(function(k) {
-        html += '<tr>' +
-          '<td><strong>' + (k.key || k.id) + '</strong></td>' +
-          '<td><span class="status-badge">ACTIVE</span></td>' +
-          '<td>' + (k.expires_at_str || '24 Jam') + '</td>' +
-          '<td>' + (k.hwid || 'Belum Terikat') + '</td>' +
-          '</tr>';
+  function handleUserGetNewKey() {
+    var savedKey = localStorage.getItem('bagasxit_user_key');
+    if (savedKey) {
+      db.ref('keys/' + savedKey).once('value').then(function(snap) {
+        var data = snap.val();
+        if (data && data.expires_at > Date.now() && data.is_active) {
+          showActiveKey(savedKey, "24 Jam (Aktif)");
+          return;
+        }
+        createNewKeyInFirebase();
       });
-      adminTableBody.innerHTML = html;
-      adminKeyCount.textContent = keysList.length;
+    } else {
+      createNewKeyInFirebase();
+    }
+  }
+
+  function createNewKeyInFirebase() {
+    statusInfo.textContent = "⚙️ Membuat key unik baru...";
+    var randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    var newKey = "BX-" + randomCode;
+    var now = Date.now();
+    var durationMs = 24 * 3600 * 1000; // 24 Jam
+
+    // SINKRON SAMA DENGAN STRUKTUR SKETCHWARE ADMIN
+    var payload = {
+      key: newKey,
+      created_at: now,
+      expires_at: now + durationMs,
+      duration_ms: durationMs,
+      expires_at_str: "24 Jam (Aktif)",
+      is_active: true,
+      hwid: "",
+      assigned_to: "Web Auto-Gen"
+    };
+
+    db.ref('keys/' + newKey).set(payload).then(function() {
+      localStorage.setItem('bagasxit_user_key', newKey);
+      showActiveKey(newKey, "24 Jam (Aktif)");
     });
   }
 
-  // COPY KEY FUNCTION
+  function showActiveKey(key, durationText) {
+    keyDisplay.textContent = key;
+    keyTimer.textContent = "Masa Aktif: " + durationText;
+    statusInfo.textContent = "✅ Key berhasil dibuat! Salin dan tempel ke APK.";
+    getBtn.style.display = "none";
+    copyBtn.style.display = "block";
+  }
+
+  getBtn.onclick = function() {
+    var randIndex = Math.floor(Math.random() * SHORTLINK_URLS.length);
+    window.open(SHORTLINK_URLS[randIndex], '_blank');
+  };
+
   copyBtn.onclick = function() {
-    var text = keyDisplay.textContent;
-    if (text.includes('LOCKED')) return;
-    navigator.clipboard.writeText(text).then(function() {
-      var orig = copyBtn.textContent;
-      copyBtn.textContent = '✅ COPIED!';
-      setTimeout(function() { copyBtn.textContent = orig; }, 2000);
-    });
+    navigator.clipboard.writeText(keyDisplay.textContent);
+    copyBtn.textContent = "✅ TERKOPY!";
+    setTimeout(() => { copyBtn.textContent = "📋 SALIN KEY"; }, 2000);
   };
 
-  // INITIAL LOAD
-  checkPasskeyAndUnlock();
+  init();
 </script>
 </body>
 </html>
