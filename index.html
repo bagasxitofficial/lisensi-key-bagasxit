@@ -5,47 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>BAGASXIT · KEY GENERATOR</title>
   <style>
+    /* Sama seperti sebelumnya, tambahkan style untuk tombol aksi */
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Courier New', monospace; }
     body { background: #0B0822; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
     .container {
-      max-width: 800px; width: 100%;
+      max-width: 900px; width: 100%;
       background: linear-gradient(145deg, #120F24, #1A153B);
       border-radius: 40px; padding: 40px 30px;
       border: 1px solid rgba(168, 85, 247, 0.35);
       box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(168, 85, 247, 0.08);
-      position: relative; overflow: hidden;
     }
-    .container::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(168,85,247,0.05), transparent 70%); pointer-events: none; }
-    .badge { display: inline-block; background: rgba(168,85,247,0.15); color: #A855F7; font-size: 11px; font-weight: 700; letter-spacing: 2px; padding: 6px 18px; border-radius: 30px; text-transform: uppercase; border: 1px solid rgba(168,85,247,0.2); margin-bottom: 20px; }
+    .badge { display: inline-block; background: rgba(168,85,247,0.15); color: #A855F7; font-size: 11px; font-weight: 700; letter-spacing: 2px; padding: 6px 18px; border-radius: 30px; border: 1px solid rgba(168,85,247,0.2); margin-bottom: 20px; }
     h1 { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: 1px; margin-bottom: 6px; }
     h1 span { background: linear-gradient(135deg, #A855F7, #D946EF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .subhead { color: #8E8AA7; font-size: 14px; margin-bottom: 30px; border-left: 3px solid #A855F7; padding-left: 16px; font-weight: 300; }
-    .status-bar { display: flex; justify-content: space-between; align-items: center; background: #0B0822; border-radius: 20px; padding: 12px 20px; margin-bottom: 30px; border: 1px solid #2A1F4A; }
-    .status-bar .label { color: #8E8AA7; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+    .subhead { color: #8E8AA7; font-size: 14px; margin-bottom: 30px; border-left: 3px solid #A855F7; padding-left: 16px; }
+    .status-bar { display: flex; justify-content: space-between; background: #0B0822; border-radius: 20px; padding: 12px 20px; margin-bottom: 30px; border: 1px solid #2A1F4A; }
+    .status-bar .label { color: #8E8AA7; font-size: 12px; }
     .status-bar .value { color: #10B981; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
     .status-bar .value::before { content: ''; display: inline-block; width: 8px; height: 8px; background: #10B981; border-radius: 50%; animation: pulse 1.5s infinite; }
-    .status-bar .value.warning { color: #F59E0B; }
-    .status-bar .value.warning::before { background: #F59E0B; }
-    .status-bar .value.error { color: #EF4444; }
-    .status-bar .value.error::before { background: #EF4444; }
     @keyframes pulse { 0% { opacity: 0.4; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.2); } 100% { opacity: 0.4; transform: scale(0.9); } }
-    .key-box { background: #0B0822; border-radius: 24px; padding: 28px 24px; border: 1px solid #2A1F4A; margin-bottom: 28px; transition: 0.3s; position: relative; }
-    .key-box .key-label { color: #8E8AA7; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 6px; }
-    .key-box .key-value { font-size: 28px; font-weight: 700; font-family: 'Courier New', monospace; color: #fff; letter-spacing: 1.5px; word-break: break-all; }
+    .key-box { background: #0B0822; border-radius: 24px; padding: 28px 24px; border: 1px solid #2A1F4A; margin-bottom: 28px; position: relative; }
+    .key-box .key-label { color: #8E8AA7; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .key-box .key-value { font-size: 28px; font-weight: 700; font-family: 'Courier New', monospace; color: #fff; letter-spacing: 1.5px; }
     .key-box .key-expiry { margin-top: 10px; font-size: 13px; color: #8E8AA7; }
     .key-box .key-expiry strong { color: #F59E0B; }
-    .key-box .key-status { position: absolute; top: 20px; right: 24px; font-size: 13px; font-weight: 700; padding: 4px 14px; border-radius: 30px; background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.2); }
-    .key-box .key-status.expired { background: rgba(239, 68, 68, 0.15); color: #EF4444; border-color: rgba(239, 68, 68, 0.2); }
-    .key-box .key-status.locked { background: rgba(245, 158, 11, 0.15); color: #F59E0B; border-color: rgba(245, 158, 11, 0.2); }
+    .key-box .key-status { position: absolute; top: 20px; right: 24px; font-size: 13px; font-weight: 700; padding: 4px 14px; border-radius: 30px; background: rgba(16,185,129,0.15); color: #10B981; border: 1px solid rgba(16,185,129,0.2); }
+    .key-box .key-status.locked { background: rgba(245,158,11,0.15); color: #F59E0B; border-color: rgba(245,158,11,0.2); }
+    .key-box .key-status.expired { background: rgba(239,68,68,0.15); color: #EF4444; border-color: rgba(239,68,68,0.2); }
     .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 30px; }
-    .btn { flex: 1; min-width: 120px; padding: 16px 20px; border-radius: 60px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; user-select: none; }
+    .btn { flex: 1; min-width: 120px; padding: 16px 20px; border-radius: 60px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
     .btn-primary { background: linear-gradient(135deg, #A855F7, #7C3AED); color: #fff; box-shadow: 0 4px 20px rgba(168,85,247,0.25); }
-    .btn-primary:hover, .btn-primary:active { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(168,85,247,0.4); }
+    .btn-primary:hover { transform: translateY(-2px); }
     .btn-secondary { background: #1A153B; color: #A855F7; border: 1px solid #3B2D6B; }
-    .btn-secondary:hover, .btn-secondary:active { background: #2A1F4A; }
+    .btn-secondary:hover { background: #2A1F4A; }
     .btn-copy { background: #0B0822; color: #A855F7; border: 1px solid #2A1F4A; flex: 0.5; display: none; }
-    .btn-copy:hover, .btn-copy:active { background: #1A153B; }
+    .btn-copy:hover { background: #1A153B; }
     .btn-success { background: #10B981; color: #fff; }
+    .btn-danger { background: #EF4444; color: #fff; }
+    .btn-warning { background: #F59E0B; color: #000; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; min-width: 60px; flex: 0; }
     .footer { text-align: center; color: #4B456B; font-size: 12px; border-top: 1px solid #1A153B; padding-top: 20px; margin-top: 10px; }
     .message-box { text-align: center; padding: 10px; border-radius: 12px; margin-bottom: 20px; background: rgba(168,85,247,0.08); color: #A855F7; border: 1px solid rgba(168,85,247,0.15); font-size: 14px; display: none; }
     .message-box.warning { background: rgba(245,158,11,0.1); color: #F59E0B; border-color: rgba(245,158,11,0.2); }
@@ -60,12 +58,14 @@
     .admin-panel { display: none; margin-top: 20px; }
     .admin-panel table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .admin-panel th { text-align: left; padding: 12px 10px; color: #8E8AA7; border-bottom: 1px solid #2A1F4A; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
-    .admin-panel td { padding: 10px; border-bottom: 1px solid #1A153B; color: #fff; }
+    .admin-panel td { padding: 10px; border-bottom: 1px solid #1A153B; color: #fff; vertical-align: middle; }
     .admin-panel td .status-badge { font-size: 11px; padding: 2px 12px; border-radius: 20px; background: rgba(16,185,129,0.15); color: #10B981; }
-    .admin-panel td .status-badge.inactive { background: rgba(239,68,68,0.15); color: #EF4444; }
+    .admin-panel td .status-badge.inactive { background: rgba(245,158,11,0.15); color: #F59E0B; }
+    .admin-panel td .status-badge.expired { background: rgba(239,68,68,0.15); color: #EF4444; }
     .admin-panel .key-count { color: #8E8AA7; font-size: 14px; margin-bottom: 16px; }
     .admin-panel .key-count strong { color: #A855F7; }
-    @media (max-width: 500px) { .container { padding: 30px 18px; } .key-box .key-value { font-size: 20px; } .btn-group { flex-direction: column; } .btn { width: 100%; } }
+    .admin-panel .action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+    @media (max-width: 500px) { .container { padding: 30px 18px; } .key-box .key-value { font-size: 20px; } .btn-group { flex-direction: column; } .btn { width: 100%; } .admin-panel table { font-size: 11px; } .admin-panel th, .admin-panel td { padding: 6px 4px; } .action-btns .btn-sm { min-width: 40px; } }
   </style>
 
   <!-- FIREBASE SDK -->
@@ -114,14 +114,14 @@
 
   <!-- ADMIN PANEL -->
   <div id="adminView" class="admin-panel">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap;">
       <div class="key-count">📋 Total Database: <strong id="adminKeyCount">0</strong> keys</div>
       <button class="btn btn-secondary" id="logoutBtn" type="button" style="padding:8px 16px; min-width:80px;">🚪 LOGOUT</button>
     </div>
     <div style="overflow-x:auto;">
       <table>
         <thead>
-          <tr><th>Key</th><th>Status</th><th>Expires</th><th>HWID Device</th></tr>
+          <tr><th>Key</th><th>Status</th><th>Expires</th><th>HWID</th><th style="min-width:180px;">Actions</th></tr>
         </thead>
         <tbody id="adminTableBody"></tbody>
       </table>
@@ -189,7 +189,7 @@
   }
 
   // ==============================================
-  // CEK PASSKEY DARI URL (UNLOCK)
+  // PASSKEY UNLOCK
   // ==============================================
   function checkPasskeyAndUnlock() {
     var urlParams = new URLSearchParams(window.location.search);
@@ -197,7 +197,6 @@
 
     if (pass === VALID_PASSKEY || pass === 'true') {
       showMessage('🎉 Berhasil melewati Shortlink! Kunci Terbuka.', 'success');
-      // Hapus parameter dari URL (anti bocor)
       if (window.history && window.history.replaceState) {
         window.history.replaceState({}, document.title, window.location.pathname);
       }
@@ -208,31 +207,23 @@
   }
 
   // ==============================================
-  // LOAD KEY DARI FIREBASE (SESUAI STRUKTUR)
+  // LOAD KEY FOR PUBLIC
   // ==============================================
   function loadPublicKeyFromFirebase(isUnlocked) {
     db.ref('keys').once('value').then(function(snapshot) {
       var data = snapshot.val();
       if (!data) {
         if (isUnlocked) {
-          showMessage('⚠️ Database kosong, tidak ada key.', 'error');
           keyDisplay.textContent = 'No Key';
           keyStatus.textContent = '⛔ EMPTY';
           keyStatus.className = 'key-status expired';
-        } else {
-          showLockedState();
-        }
+        } else showLockedState();
         return;
       }
 
       var now = Date.now();
-      var keysList = Object.keys(data).map(function(k) {
-        var obj = data[k];
-        obj.id = k;
-        return obj;
-      });
-
-      // Cari key aktif (is_active === true, expires_at > now)
+      var keysList = Object.keys(data).map(function(k) { return Object.assign({ id: k }, data[k]); });
+      // Cari key yang aktif (is_active === true) dan belum expired
       var validKeys = keysList.filter(function(k) {
         var isActive = (k.is_active === true || k.is_active === "true");
         var notExpired = !k.expires_at || k.expires_at > now;
@@ -241,37 +232,25 @@
 
       if (validKeys.length === 0) {
         if (isUnlocked) {
-          showMessage('⚠️ Tidak ada key aktif saat ini.', 'error');
           keyDisplay.textContent = 'No Active Key';
           keyStatus.textContent = '⛔ EXPIRED';
           keyStatus.className = 'key-status expired';
-        } else {
-          showLockedState();
-        }
+        } else showLockedState();
         return;
       }
 
-      // Ambil key pertama (atau bisa random)
       var selected = validKeys[0];
       currentUnlockedKey = selected;
-
-      if (isUnlocked) {
-        renderKey(selected);
-      } else {
-        showLockedState();
-      }
+      if (isUnlocked) renderKey(selected);
+      else showLockedState();
     }).catch(function(err) {
-      console.error(err);
-      showMessage('Error loading keys: ' + err.message, 'error');
+      showMessage('Error: ' + err.message, 'error');
     });
   }
 
-  // ==============================================
-  // RENDER KEY (SETELAH UNLOCK)
-  // ==============================================
   function renderKey(keyData) {
     if (!keyData) return;
-    var keyStr = keyData.key || keyData.id || 'BX-VIP2026';
+    var keyStr = keyData.key || keyData.id;
     keyDisplay.textContent = keyStr;
 
     var expiry = keyData.expires_at;
@@ -285,10 +264,9 @@
     } else {
       keyExpiry.innerHTML = '⏳ <strong>No expiry</strong>';
     }
-
     keyStatus.textContent = '✅ UNLOCKED';
     keyStatus.className = 'key-status';
-    copyBtn.style.display = 'inline-flex'; // tampilkan tombol copy
+    copyBtn.style.display = 'inline-flex';
   }
 
   function showLockedState() {
@@ -300,18 +278,13 @@
   }
 
   // ==============================================
-  // TOMBOL SHORTLINK
+  // SHORTLINK & COPY
   // ==============================================
   shortlinkBtn.onclick = function() {
     var randomIndex = Math.floor(Math.random() * MOVE2LINK_LIST.length);
     window.open(MOVE2LINK_LIST[randomIndex], '_blank');
-    // Setelah buka shortlink, kita harap user kembali dengan passkey
-    // Tapi kita tidak bisa langsung unlock, nanti dicek di checkPasskeyAndUnlock
   };
 
-  // ==============================================
-  // COPY KEY
-  // ==============================================
   copyBtn.onclick = function() {
     var text = keyDisplay.textContent;
     if (text.includes('LOCKED')) return;
@@ -320,12 +293,8 @@
         var orig = copyBtn.textContent;
         copyBtn.textContent = '✅ COPIED!';
         setTimeout(function() { copyBtn.textContent = orig; }, 2000);
-      }).catch(function() {
-        fallbackCopy(text);
-      });
-    } else {
-      fallbackCopy(text);
-    }
+      }).catch(function() { fallbackCopy(text); });
+    } else { fallbackCopy(text); }
   };
   function fallbackCopy(text) {
     var ta = document.createElement('textarea');
@@ -342,7 +311,7 @@
   }
 
   // ==============================================
-  // ADMIN LOGIN (CEK KE NODE /admins)
+  // ADMIN LOGIN
   // ==============================================
   adminBtn.onclick = function() {
     publicView.style.display = 'none';
@@ -351,26 +320,18 @@
     modeLabel.textContent = '🔐 Admin Access';
   };
 
-  backToPublicBtn.onclick = function() {
-    goToPublicView();
-  };
-  backToPublicFromAdmin.onclick = function() {
-    goToPublicView();
-  };
-  logoutBtn.onclick = function() {
-    goToPublicView();
-  };
+  backToPublicBtn.onclick = function() { goToPublicView(); };
+  backToPublicFromAdmin.onclick = function() { goToPublicView(); };
+  logoutBtn.onclick = function() { goToPublicView(); };
 
   function goToPublicView() {
     publicView.style.display = 'block';
     loginView.style.display = 'none';
     adminView.style.display = 'none';
     modeLabel.textContent = 'Bypass Shortlink untuk mendapatkan Key Asli';
-    // Refresh status key
     checkPasskeyAndUnlock();
   }
 
-  // LOGIN
   loginBtn.onclick = function() {
     var user = loginUser.value.trim();
     var pass = loginPass.value.trim();
@@ -379,8 +340,6 @@
       loginError.style.display = 'block';
       return;
     }
-
-    // Ambil data admin dari Firebase
     db.ref('admins').once('value').then(function(snapshot) {
       var data = snapshot.val();
       if (!data) {
@@ -412,13 +371,13 @@
   };
 
   // ==============================================
-  // ADMIN PANEL – TAMPILKAN SEMUA KEY
+  // ADMIN PANEL – LOAD + ACTIONS
   // ==============================================
   function loadAdminKeys() {
     db.ref('keys').once('value').then(function(snapshot) {
       var data = snapshot.val();
       if (!data) {
-        adminTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Database Kosong</td></tr>';
+        adminTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Database Kosong</td></tr>';
         adminKeyCount.textContent = '0';
         return;
       }
@@ -432,20 +391,88 @@
       keysList.forEach(function(k) {
         var isActive = (k.is_active === true || k.is_active === "true");
         var notExpired = !k.expires_at || k.expires_at > now;
-        var statusText = (isActive && notExpired) ? 'ACTIVE' : 'INACTIVE';
-        var statusClass = (isActive && notExpired) ? '' : 'inactive';
+        var statusText = '';
+        var statusClass = '';
+        if (isActive && notExpired) {
+          statusText = 'ACTIVE';
+          statusClass = '';
+        } else if (!isActive) {
+          statusText = 'INACTIVE';
+          statusClass = 'inactive';
+        } else {
+          statusText = 'EXPIRED';
+          statusClass = 'expired';
+        }
         var expiryStr = k.expires_at ? new Date(k.expires_at).toLocaleString() : '—';
-        var hwid = k.hwid || 'Belum Terikat';
+        var hwid = k.hwid || '—';
+
         html += '<tr>' +
           '<td><strong>' + (k.key || k.id) + '</strong></td>' +
           '<td><span class="status-badge ' + statusClass + '">' + statusText + '</span></td>' +
           '<td>' + expiryStr + '</td>' +
           '<td>' + hwid + '</td>' +
+          '<td><div class="action-btns">' +
+            '<button class="btn btn-warning btn-sm" data-id="' + k.id + '" data-action="toggle">Toggle</button>' +
+            '<button class="btn btn-danger btn-sm" data-id="' + k.id + '" data-action="reset">Reset HWID</button>' +
+            '<button class="btn btn-danger btn-sm" data-id="' + k.id + '" data-action="delete">Delete</button>' +
+          '</div></td>' +
           '</tr>';
       });
       adminTableBody.innerHTML = html;
       adminKeyCount.textContent = keysList.length;
+
+      // Attach event listeners to action buttons
+      document.querySelectorAll('#adminTableBody .btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          var id = this.dataset.id;
+          var action = this.dataset.action;
+          if (action === 'toggle') {
+            toggleActive(id);
+          } else if (action === 'reset') {
+            resetHwid(id);
+          } else if (action === 'delete') {
+            deleteKey(id);
+          }
+        });
+      });
     });
+  }
+
+  // ==============================================
+  // ADMIN ACTIONS (PATCH KE FIREBASE)
+  // ==============================================
+  function toggleActive(id) {
+    // Toggle is_active
+    db.ref('keys/' + id + '/is_active').once('value').then(function(snap) {
+      var current = snap.val();
+      var newVal = !(current === true || current === "true");
+      db.ref('keys/' + id + '/is_active').set(newVal).then(function() {
+        showMessage('✅ is_active toggled to ' + newVal, 'success');
+        loadAdminKeys();
+      }).catch(function(err) {
+        showMessage('Error: ' + err.message, 'error');
+      });
+    });
+  }
+
+  function resetHwid(id) {
+    db.ref('keys/' + id + '/hwid').set('').then(function() {
+      showMessage('✅ HWID reset untuk key ' + id, 'success');
+      loadAdminKeys();
+    }).catch(function(err) {
+      showMessage('Error: ' + err.message, 'error');
+    });
+  }
+
+  function deleteKey(id) {
+    if (confirm('Yakin ingin menghapus key ' + id + '?')) {
+      db.ref('keys/' + id).remove().then(function() {
+        showMessage('✅ Key ' + id + ' dihapus.', 'success');
+        loadAdminKeys();
+      }).catch(function(err) {
+        showMessage('Error: ' + err.message, 'error');
+      });
+    }
   }
 
   // ==============================================
