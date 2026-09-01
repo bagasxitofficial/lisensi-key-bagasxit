@@ -185,15 +185,23 @@
   // ============================================================
   // CEK PASSKEY DARI URL (UNLOCK)
   // ============================================================
-  function checkPasskeyAndUnlock() {
+    function checkPasskeyAndUnlock() {
     var urlParams = new URLSearchParams(window.location.search);
     var pass = urlParams.get('pass') || urlParams.get('unlocked');
-    if (pass === VALID_PASSKEY || pass === 'true') {
+    
+    // Cek apakah sesi ini sudah pernah divalidasi lokal
+    var isSessionUnlocked = sessionStorage.getItem('unlocked_session') === 'true';
+
+    if ((pass === VALID_PASSKEY || pass === 'true') || isSessionUnlocked) {
       isUnlocked = true;
-      showMessage('🎉 Berhasil melewati Shortlink! Kunci Terbuka.', 'success');
+      sessionStorage.setItem('unlocked_session', 'true');
+      
+      // Bersihkan URL dari browser agar link tidak gampang disalin
       if (window.history && window.history.replaceState) {
         window.history.replaceState({}, document.title, window.location.pathname);
       }
+      
+      showMessage('🎉 Berhasil melewati Shortlink! Kunci Terbuka.', 'success');
       loadAvailableKey();
     } else {
       loadAvailableKey();
@@ -218,32 +226,31 @@
         return obj;
       });
 
-      // Filter: key yang BELUM dipakai (is_active == false atau hwid kosong) dan belum expired
+      // Filter: key yang BELUM dipakai dan belum expired
       var availableKeys = keysList.filter(function(k) {
         var isActive = (k.is_active === true || k.is_active === "true");
         var hasHwid = (k.hwid && k.hwid.length > 0);
         var notExpired = !k.expires_at || k.expires_at > now;
-        // Yang tersedia: belum aktif (inactive) dan belum ada hwid, serta belum expired
         return !isActive && !hasHwid && notExpired;
       });
 
       if (availableKeys.length === 0) {
-        // Cek apakah ada key aktif tapi sudah terpakai – beri tahu user
         var activeKeys = keysList.filter(function(k) {
           var isActive = (k.is_active === true || k.is_active === "true");
           var hasHwid = (k.hwid && k.hwid.length > 0);
           return isActive && hasHwid;
         });
         if (activeKeys.length > 0) {
-          showNoKeyState('✅ Key sudah aktif dan terikat perangkat. Tidak perlu mengambil key baru.');
+          showNoKeyState('✅ Key sudah aktif dan terikat perangkat.');
         } else {
           showNoKeyState('⚠️ Tidak ada key tersedia. Hubungi admin.');
         }
         return;
       }
 
-      // Ambil key pertama yang tersedia
-      currentKeyData = availableKeys[0];
+      // PERBAIKAN: Ambil key secara acak dari daftar yang tersedia
+      var randomIndex = Math.floor(Math.random() * availableKeys.length);
+      currentKeyData = availableKeys[randomIndex];
       renderKey(currentKeyData, isUnlocked);
     }).catch(function(err) {
       console.error(err);
