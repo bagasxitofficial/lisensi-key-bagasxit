@@ -46,6 +46,7 @@
     .btn-secondary:hover { background: #2A1F4A; }
     .btn-copy { background: #0B0822; color: #A855F7; border: 1px solid #2A1F4A; flex: 0.5; display: none; }
     .btn-copy:hover { background: #1A153B; }
+    .btn-success { background: #10B981; color: #fff; }
     .footer { text-align: center; color: #4B456B; font-size: 12px; border-top: 1px solid #1A153B; padding-top: 20px; margin-top: 10px; }
     .message-box { text-align: center; padding: 10px; border-radius: 12px; margin-bottom: 20px; background: rgba(168,85,247,0.08); color: #A855F7; border: 1px solid rgba(168,85,247,0.15); font-size: 14px; display: none; }
     .message-box.warning { background: rgba(245,158,11,0.1); color: #F59E0B; border-color: rgba(245,158,11,0.2); }
@@ -68,10 +69,9 @@
     @media (max-width: 500px) { .container { padding: 30px 18px; } .key-box .key-value { font-size: 22px; } .btn-group { flex-direction: column; } .btn { min-width: unset; } .status-bar { flex-direction: column; align-items: flex-start; gap: 6px; } }
   </style>
 
-  <!-- FIREBASE SDK -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 </head>
 <body>
 
@@ -133,25 +133,17 @@
 
 <script>
   // ============================================================
-  // 1. KONFIGURASI FIREBASE (ISI DENGAN DATA DARI PROJECT SETTINGS)
+  // KONFIGURASI
   // ============================================================
   var firebaseConfig = {
-    apiKey: "AIzaSyAH7lujCx2krLuWOk_k9jprrsE1JoV_B6g",  // GANTI DENGAN API KEY LO
-    authDomain: "bagasxit-official.firebaseapp.com",       // GANTI
-    databaseURL: "https://bagasxit-official-default-rtdb.firebaseio.com",
-    projectId: "bagasxit-official",
-    storageBucket: "bagasxit-official.appspot.com",
-    messagingSenderId: "613462485191",
-    appId: "1:613462485191:web:...",                        // GANTI DENGAN APP ID WEB LO
+    databaseURL: "https://bagasxit-official-default-rtdb.firebaseio.com"
   };
-
   if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
   }
   var db = firebase.database();
 
-  // SHORTLINK
-  var SHORTLINK_URL = 'https://move2link.co/ac512ac';
+  var SHORTLINK_URL = 'https://move2link.co/ac512ac'; // ganti dengan shortlink lo
   var VALID_PASSKEY = 'BAGASXIT2026';
 
   // DOM refs
@@ -182,7 +174,6 @@
 
   var currentKeyData = null;
   var isUnlocked = false;
-  var isAuthReady = false;
 
   function showMessage(msg, type) {
     messageBox.textContent = msg;
@@ -192,37 +183,9 @@
   }
 
   // ============================================================
-  // 2. LOGIN ANONIM + FALLBACK
-  // ============================================================
-  firebase.auth().signInAnonymously()
-    .then(function() {
-      console.log('✅ Auth anonim berhasil');
-      isAuthReady = true;
-      statusText.textContent = 'AUTH / READY';
-      statusText.className = 'value';
-      checkPasskeyAndUnlock();
-    })
-    .catch(function(error) {
-      console.error('Auth anonim gagal:', error);
-      showMessage('Gagal autentikasi: ' + error.message, 'error');
-      statusText.textContent = '⚠️ AUTH ERROR';
-      statusText.className = 'value error';
-      // FALLBACK: coba baca data tanpa auth (tidak akan berhasil, tapi setidaknya user tahu)
-      // Kita tetap jalankan load data, tapi kemungkinan error
-      isAuthReady = false;
-      // Tapi kita tetap coba load data – nanti error-nya muncul di message box
-      loadAvailableKey();
-    });
-
-  // ============================================================
-  // 3. CEK PASSKEY DARI URL
+  // CEK PASSKEY DARI URL (UNLOCK)
   // ============================================================
   function checkPasskeyAndUnlock() {
-    if (!isAuthReady) {
-      // Kalau auth belum siap, tunggu sebentar lalu coba lagi
-      setTimeout(checkPasskeyAndUnlock, 1000);
-      return;
-    }
     var urlParams = new URLSearchParams(window.location.search);
     var pass = urlParams.get('pass') || urlParams.get('unlocked');
     if (pass === VALID_PASSKEY || pass === 'true') {
@@ -238,16 +201,9 @@
   }
 
   // ============================================================
-  // 4. LOAD KEY YANG BELUM DIPAKAI
+  // LOAD KEY YANG BELUM DIPAKAI (is_active == false / hwid == "")
   // ============================================================
   function loadAvailableKey() {
-    if (!isAuthReady) {
-      // Tampilkan pesan menunggu auth
-      keyDisplay.textContent = '⏳ Menunggu Auth...';
-      keyStatus.textContent = '⏳ AUTH';
-      keyStatus.className = 'key-status locked';
-      return;
-    }
     db.ref('keys').once('value').then(function(snapshot) {
       var data = snapshot.val();
       if (!data) {
@@ -267,10 +223,12 @@
         var isActive = (k.is_active === true || k.is_active === "true");
         var hasHwid = (k.hwid && k.hwid.length > 0);
         var notExpired = !k.expires_at || k.expires_at > now;
+        // Yang tersedia: belum aktif (inactive) dan belum ada hwid, serta belum expired
         return !isActive && !hasHwid && notExpired;
       });
 
       if (availableKeys.length === 0) {
+        // Cek apakah ada key aktif tapi sudah terpakai – beri tahu user
         var activeKeys = keysList.filter(function(k) {
           var isActive = (k.is_active === true || k.is_active === "true");
           var hasHwid = (k.hwid && k.hwid.length > 0);
@@ -284,6 +242,7 @@
         return;
       }
 
+      // Ambil key pertama yang tersedia
       currentKeyData = availableKeys[0];
       renderKey(currentKeyData, isUnlocked);
     }).catch(function(err) {
@@ -296,7 +255,7 @@
   }
 
   // ============================================================
-  // 5. RENDER KEY
+  // RENDER KEY
   // ============================================================
   function renderKey(keyData, unlocked) {
     if (!keyData) {
@@ -308,6 +267,7 @@
     var expiry = keyData.expires_at || 0;
 
     if (unlocked) {
+      // Key terbuka – tampilkan asli
       keyDisplay.textContent = keyStr;
       if (expiry > 0) {
         var diff = Math.floor((expiry - Date.now()) / 1000 / 60 / 60);
@@ -325,6 +285,7 @@
       getKeyBtn.textContent = '🔑 Key Tersedia';
       getKeyBtn.disabled = true;
     } else {
+      // Key terkunci – tampilkan LOCKED
       keyDisplay.textContent = '🔒 LOCKED';
       keyExpiry.innerHTML = '⏳ Klik <strong>GET KEY</strong> untuk melewati Shortlink.';
       keyStatus.textContent = '🔒 LOCKED';
@@ -348,7 +309,7 @@
   }
 
   // ============================================================
-  // 6. TOMBOL GET KEY (BUKA SHORTLINK)
+  // TOMBOL GET KEY (BUKA SHORTLINK)
   // ============================================================
   getKeyBtn.onclick = function() {
     if (this.disabled) return;
@@ -356,12 +317,14 @@
       showMessage('Key sudah terbuka! Salin key-nya.', 'success');
       return;
     }
+    // Buka shortlink di tab baru
     window.open(SHORTLINK_URL, '_blank');
+    // Setelah user kembali dengan passkey, halaman akan reload dan unlock otomatis
     showMessage('🔓 Shortlink dibuka. Kembali ke halaman ini untuk melihat key.', 'info');
   };
 
   // ============================================================
-  // 7. COPY KEY
+  // COPY KEY
   // ============================================================
   copyBtn.onclick = function() {
     if (!isUnlocked || !currentKeyData) {
@@ -394,7 +357,7 @@
   }
 
   // ============================================================
-  // 8. ADMIN LOGIN + PANEL
+  // ADMIN LOGIN + PANEL (sama seperti sebelumnya)
   // ============================================================
   adminBtn.onclick = function() {
     publicView.style.display = 'none';
@@ -421,11 +384,6 @@
     var pass = loginPass.value.trim();
     if (!user || !pass) {
       loginError.textContent = 'Isi username dan password!';
-      loginError.style.display = 'block';
-      return;
-    }
-    if (!isAuthReady) {
-      loginError.textContent = 'Autentikasi belum siap, tunggu sebentar.';
       loginError.style.display = 'block';
       return;
     }
@@ -460,7 +418,6 @@
   };
 
   function loadAdminKeys() {
-    if (!isAuthReady) return;
     db.ref('keys').once('value').then(function(snapshot) {
       var data = snapshot.val();
       if (!data) {
@@ -503,6 +460,11 @@
       adminKeyCount.textContent = keysList.length;
     });
   }
+
+  // ============================================================
+  // START
+  // ============================================================
+  checkPasskeyAndUnlock();
 </script>
 </body>
 </html>
