@@ -45,7 +45,7 @@
 <body>
 
 <div class="container">
-  <div class="badge">⚡ OFFICIAL GENERATOR</div>
+  <div class="badge">🗿OFFICIAL GENERATOR🗿</div>
   <h1><span>BAGASXIT</span> KEY SYSTEM</h1>
 
   <div class="key-box">
@@ -63,17 +63,17 @@
     </div>
   </div>
 
-  <button class="btn" id="getBtn">🔗 GET KEY (SHORTLINK)</button>
-  <button class="btn btn-copy" id="copyBtn">📋 SALIN KEY</button>
+  <button class="btn" id="getBtn">GENERATE KEY</button>
+  <button class="btn btn-copy" id="copyBtn">COPY KEY</button>
 
-  <div class="info" id="statusInfo">Harap selesaikan verifikasi Keamanan di atas.</div>
+  <div class="info" id="statusInfo">Please complete the security verification above.</div>
 
   <!-- PANEL ADMIN WEB TERSEMBUNYI -->
   <div class="admin-panel" id="adminPanel">
     <h3>👑 WEB ADMIN PANEL</h3>
     <input type="text" id="customKey" class="admin-input" placeholder="Custom Key (Opsional / Kosongkan utk Auto)">
     <input type="number" id="customHours" class="admin-input" placeholder="Durasi (Jam)" value="5">
-    <button class="btn-admin" id="btnAdminGen">⚡ GENERATE KEY ADMIN</button>
+    <button class="btn-admin" id="btnAdminGen">🗿GENERATE KEY ADMIN🗿</button>
   </div>
 </div>
 
@@ -106,7 +106,7 @@
   function onTurnstileSuccess(token) {
     turnstileBox.style.display = "none";
     getBtn.style.display = "block";
-    statusInfo.textContent = "✅ Verifikasi berhasil! Klik tombol di atas untuk mengambil lisensi 5 Jam.";
+    statusInfo.textContent = "✅ Cloudflare verification to continue.";
   }
 
   // ALGORITMA MEMBUAT TOKEN 60 DETIK
@@ -146,7 +146,7 @@
       
       var usedTokenKey = "used_tok_" + token;
       if (localStorage.getItem(usedTokenKey)) {
-        statusInfo.textContent = "❌ Link kadaluarsa / sudah pernah digunakan!";
+        statusInfo.textContent = "⚠️Link expired / already used!⚠️";
         checkDeviceExistingKey();
         return;
       }
@@ -217,7 +217,7 @@
   function showActiveKey(key, durationText) {
     keyDisplay.textContent = key;
     keyTimer.textContent = "Masa Aktif: " + durationText;
-    statusInfo.textContent = "✅ Key berhasil dibuat! Salin dan tempel ke APK.";
+    statusInfo.textContent = "✅Key successfully generated! Copy and paste the key into APKMODS✅";
     turnstileBox.style.display = "none";
     getBtn.style.display = "none";
     copyBtn.style.display = "block";
@@ -254,7 +254,7 @@
 
   copyBtn.onclick = function() {
     navigator.clipboard.writeText(keyDisplay.textContent);
-    copyBtn.textContent = "✅ TERKOPY!";
+    copyBtn.textContent = "✅Successfully copy!";
     setTimeout(() => { copyBtn.textContent = "📋 SALIN KEY"; }, 2000);
   };
 
