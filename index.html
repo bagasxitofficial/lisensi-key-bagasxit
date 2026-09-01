@@ -5,70 +5,71 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>BAGASXIT · KEY GENERATOR</title>
   <style>
-    /* Sama seperti sebelumnya, tambahkan style untuk tombol aksi */
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Courier New', monospace; }
     body { background: #0B0822; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
     .container {
-      max-width: 900px; width: 100%;
+      max-width: 800px; width: 100%;
       background: linear-gradient(145deg, #120F24, #1A153B);
       border-radius: 40px; padding: 40px 30px;
       border: 1px solid rgba(168, 85, 247, 0.35);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(168, 85, 247, 0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+      position: relative;
     }
+    .container::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(168,85,247,0.05), transparent 70%); pointer-events: none; }
     .badge { display: inline-block; background: rgba(168,85,247,0.15); color: #A855F7; font-size: 11px; font-weight: 700; letter-spacing: 2px; padding: 6px 18px; border-radius: 30px; border: 1px solid rgba(168,85,247,0.2); margin-bottom: 20px; }
     h1 { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: 1px; margin-bottom: 6px; }
     h1 span { background: linear-gradient(135deg, #A855F7, #D946EF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .subhead { color: #8E8AA7; font-size: 14px; margin-bottom: 30px; border-left: 3px solid #A855F7; padding-left: 16px; }
+    .subhead { color: #8E8AA7; font-size: 14px; margin-bottom: 30px; border-left: 3px solid #A855F7; padding-left: 16px; font-weight: 300; }
     .status-bar { display: flex; justify-content: space-between; background: #0B0822; border-radius: 20px; padding: 12px 20px; margin-bottom: 30px; border: 1px solid #2A1F4A; }
     .status-bar .label { color: #8E8AA7; font-size: 12px; }
     .status-bar .value { color: #10B981; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
     .status-bar .value::before { content: ''; display: inline-block; width: 8px; height: 8px; background: #10B981; border-radius: 50%; animation: pulse 1.5s infinite; }
+    .status-bar .value.warning { color: #F59E0B; }
+    .status-bar .value.warning::before { background: #F59E0B; }
+    .status-bar .value.error { color: #EF4444; }
+    .status-bar .value.error::before { background: #EF4444; }
     @keyframes pulse { 0% { opacity: 0.4; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.2); } 100% { opacity: 0.4; transform: scale(0.9); } }
     .key-box { background: #0B0822; border-radius: 24px; padding: 28px 24px; border: 1px solid #2A1F4A; margin-bottom: 28px; position: relative; }
-    .key-box .key-label { color: #8E8AA7; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-    .key-box .key-value { font-size: 28px; font-weight: 700; font-family: 'Courier New', monospace; color: #fff; letter-spacing: 1.5px; }
+    .key-box .key-label { color: #8E8AA7; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 6px; }
+    .key-box .key-value { font-size: 28px; font-weight: 700; font-family: 'Courier New', monospace; color: #fff; letter-spacing: 1.5px; word-break: break-all; }
     .key-box .key-expiry { margin-top: 10px; font-size: 13px; color: #8E8AA7; }
     .key-box .key-expiry strong { color: #F59E0B; }
     .key-box .key-status { position: absolute; top: 20px; right: 24px; font-size: 13px; font-weight: 700; padding: 4px 14px; border-radius: 30px; background: rgba(16,185,129,0.15); color: #10B981; border: 1px solid rgba(16,185,129,0.2); }
     .key-box .key-status.locked { background: rgba(245,158,11,0.15); color: #F59E0B; border-color: rgba(245,158,11,0.2); }
     .key-box .key-status.expired { background: rgba(239,68,68,0.15); color: #EF4444; border-color: rgba(239,68,68,0.2); }
+    .key-box .key-status.empty { background: rgba(239,68,68,0.15); color: #EF4444; border-color: rgba(239,68,68,0.2); }
     .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 30px; }
     .btn { flex: 1; min-width: 120px; padding: 16px 20px; border-radius: 60px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
     .btn-primary { background: linear-gradient(135deg, #A855F7, #7C3AED); color: #fff; box-shadow: 0 4px 20px rgba(168,85,247,0.25); }
-    .btn-primary:hover { transform: translateY(-2px); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(168,85,247,0.4); }
     .btn-secondary { background: #1A153B; color: #A855F7; border: 1px solid #3B2D6B; }
     .btn-secondary:hover { background: #2A1F4A; }
     .btn-copy { background: #0B0822; color: #A855F7; border: 1px solid #2A1F4A; flex: 0.5; display: none; }
     .btn-copy:hover { background: #1A153B; }
     .btn-success { background: #10B981; color: #fff; }
-    .btn-danger { background: #EF4444; color: #fff; }
-    .btn-warning { background: #F59E0B; color: #000; }
-    .btn-sm { padding: 6px 12px; font-size: 12px; min-width: 60px; flex: 0; }
     .footer { text-align: center; color: #4B456B; font-size: 12px; border-top: 1px solid #1A153B; padding-top: 20px; margin-top: 10px; }
     .message-box { text-align: center; padding: 10px; border-radius: 12px; margin-bottom: 20px; background: rgba(168,85,247,0.08); color: #A855F7; border: 1px solid rgba(168,85,247,0.15); font-size: 14px; display: none; }
     .message-box.warning { background: rgba(245,158,11,0.1); color: #F59E0B; border-color: rgba(245,158,11,0.2); }
     .message-box.error { background: rgba(239,68,68,0.1); color: #EF4444; border-color: rgba(239,68,68,0.2); }
     .message-box.success { background: rgba(16,185,129,0.1); color: #10B981; border-color: rgba(16,185,129,0.2); }
-
     .login-form { display: none; margin-bottom: 30px; }
     .login-form input { width: 100%; padding: 16px 20px; margin-bottom: 14px; background: #0B0822; border: 1px solid #2A1F4A; border-radius: 16px; color: #fff; font-size: 16px; outline: none; }
     .login-form input:focus { border-color: #A855F7; }
+    .login-form .btn { width: 100%; }
     .login-form .error-msg { color: #EF4444; font-size: 14px; margin-top: 10px; display: none; }
-
     .admin-panel { display: none; margin-top: 20px; }
     .admin-panel table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .admin-panel th { text-align: left; padding: 12px 10px; color: #8E8AA7; border-bottom: 1px solid #2A1F4A; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
-    .admin-panel td { padding: 10px; border-bottom: 1px solid #1A153B; color: #fff; vertical-align: middle; }
+    .admin-panel td { padding: 10px; border-bottom: 1px solid #1A153B; color: #fff; }
     .admin-panel td .status-badge { font-size: 11px; padding: 2px 12px; border-radius: 20px; background: rgba(16,185,129,0.15); color: #10B981; }
     .admin-panel td .status-badge.inactive { background: rgba(245,158,11,0.15); color: #F59E0B; }
     .admin-panel td .status-badge.expired { background: rgba(239,68,68,0.15); color: #EF4444; }
     .admin-panel .key-count { color: #8E8AA7; font-size: 14px; margin-bottom: 16px; }
     .admin-panel .key-count strong { color: #A855F7; }
-    .admin-panel .action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
-    @media (max-width: 500px) { .container { padding: 30px 18px; } .key-box .key-value { font-size: 20px; } .btn-group { flex-direction: column; } .btn { width: 100%; } .admin-panel table { font-size: 11px; } .admin-panel th, .admin-panel td { padding: 6px 4px; } .action-btns .btn-sm { min-width: 40px; } }
+    @media (max-width: 500px) { .container { padding: 30px 18px; } .key-box .key-value { font-size: 22px; } .btn-group { flex-direction: column; } .btn { min-width: unset; } .status-bar { flex-direction: column; align-items: flex-start; gap: 6px; } }
   </style>
 
-  <!-- FIREBASE SDK -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 </head>
@@ -77,7 +78,7 @@
 <div class="container">
   <div class="badge">⚡ BAGASXIT · GENERATOR</div>
   <h1><span>BAGASXIT</span> KEY</h1>
-  <div class="subhead" id="modeLabel">Bypass Shortlink untuk mendapatkan Key Asli</div>
+  <div class="subhead" id="modeLabel">Ambil key yang belum pernah dipakai</div>
 
   <div class="status-bar">
     <span class="label">🔐 NODE STATUS</span>
@@ -86,58 +87,54 @@
 
   <div id="messageBox" class="message-box"></div>
 
-  <!-- PUBLIC: KEY DISPLAY -->
+  <!-- PUBLIC VIEW -->
   <div id="publicView">
     <div class="key-box" id="keyBox">
       <div class="key-label">📋 YOUR ACCESS KEY</div>
-      <div class="key-value" id="keyDisplay">LOCKED 🔒</div>
-      <div class="key-expiry" id="keyExpiry">⏳ Silakan lewati Shortlink untuk membuka Key.</div>
-      <div class="key-status locked" id="keyStatus">🔒 LOCKED</div>
+      <div class="key-value" id="keyDisplay">—</div>
+      <div class="key-expiry" id="keyExpiry">⏳ <strong>Memuat data...</strong></div>
+      <div class="key-status" id="keyStatus">⏳ LOADING</div>
     </div>
 
     <div class="btn-group">
-      <button class="btn btn-primary" id="shortlinkBtn" type="button">🔗 GET KEY (SHORTLINK)</button>
-      <button class="btn btn-copy" id="copyBtn" type="button">📋 COPY</button>
-      <button class="btn btn-secondary" id="adminBtn" type="button">⚙️ ADMIN</button>
+      <button class="btn btn-primary" id="getKeyBtn">🔑 GET KEY</button>
+      <button class="btn btn-copy" id="copyBtn">📋 COPY</button>
+      <button class="btn btn-secondary" id="adminBtn">⚙️ ADMIN</button>
     </div>
   </div>
 
   <!-- LOGIN FORM -->
   <div id="loginView" class="login-form">
     <h3 style="color:#fff; margin-bottom:20px; font-weight:600;">🔐 ADMIN ACCESS</h3>
-    <input type="text" id="loginUser" placeholder="Username Admin" autocomplete="off" />
+    <input type="text" id="loginUser" placeholder="Username Admin" />
     <input type="password" id="loginPass" placeholder="Password" />
-    <button class="btn btn-primary" id="loginBtn" type="button">🔓 LOGIN</button>
+    <button class="btn btn-primary" id="loginBtn">🔓 LOGIN</button>
     <div id="loginError" class="error-msg">❌ Username atau password salah!</div>
-    <button class="btn btn-secondary" id="backToPublicBtn" type="button" style="margin-top:12px;">← Kembali ke Generator</button>
+    <button class="btn btn-secondary" id="backToPublicBtn" style="margin-top:12px;">← Kembali</button>
   </div>
 
   <!-- ADMIN PANEL -->
   <div id="adminView" class="admin-panel">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap;">
-      <div class="key-count">📋 Total Database: <strong id="adminKeyCount">0</strong> keys</div>
-      <button class="btn btn-secondary" id="logoutBtn" type="button" style="padding:8px 16px; min-width:80px;">🚪 LOGOUT</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <div class="key-count">📋 Total key: <strong id="adminKeyCount">0</strong></div>
+      <button class="btn btn-secondary" id="logoutBtn" style="padding:8px 16px;">🚪 LOGOUT</button>
     </div>
     <div style="overflow-x:auto;">
       <table>
-        <thead>
-          <tr><th>Key</th><th>Status</th><th>Expires</th><th>HWID</th><th style="min-width:180px;">Actions</th></tr>
-        </thead>
+        <thead><tr><th>Key</th><th>Status</th><th>Expires</th><th>HWID</th></tr></thead>
         <tbody id="adminTableBody"></tbody>
       </table>
     </div>
-    <button class="btn btn-secondary" id="backToPublicFromAdmin" type="button" style="margin-top:16px;">← Kembali ke Generator</button>
+    <button class="btn btn-secondary" id="backToPublicFromAdmin" style="margin-top:16px;">← Kembali</button>
   </div>
 
-  <div class="footer">
-    © BAGASXIT · System Online
-  </div>
+  <div class="footer">© BAGASXIT · System Online</div>
 </div>
 
 <script>
-  // ==============================================
-  // KONFIGURASI FIREBASE
-  // ==============================================
+  // ============================================================
+  // KONFIGURASI
+  // ============================================================
   var firebaseConfig = {
     databaseURL: "https://bagasxit-official-default-rtdb.firebaseio.com"
   };
@@ -146,20 +143,16 @@
   }
   var db = firebase.database();
 
-  // SHORTLINK + PASSKEY
-  var MOVE2LINK_LIST = [
-    'https://move2link.co/ac512ac',
-    'https://move2link.co/959a72b'
-  ];
+  var SHORTLINK_URL = 'https://move2link.co/ac512ac'; // ganti dengan shortlink lo
   var VALID_PASSKEY = 'BAGASXIT2026';
 
-  // DOM ELEMENTS
+  // DOM refs
   var keyDisplay = document.getElementById('keyDisplay');
   var keyExpiry = document.getElementById('keyExpiry');
   var keyStatus = document.getElementById('keyStatus');
   var statusText = document.getElementById('statusText');
   var copyBtn = document.getElementById('copyBtn');
-  var shortlinkBtn = document.getElementById('shortlinkBtn');
+  var getKeyBtn = document.getElementById('getKeyBtn');
   var adminBtn = document.getElementById('adminBtn');
   var messageBox = document.getElementById('messageBox');
   var modeLabel = document.getElementById('modeLabel');
@@ -179,7 +172,8 @@
   var logoutBtn = document.getElementById('logoutBtn');
   var backToPublicFromAdmin = document.getElementById('backToPublicFromAdmin');
 
-  var currentUnlockedKey = null;
+  var currentKeyData = null;
+  var isUnlocked = false;
 
   function showMessage(msg, type) {
     messageBox.textContent = msg;
@@ -188,113 +182,165 @@
     setTimeout(function() { messageBox.style.display = 'none'; }, 5000);
   }
 
-  // ==============================================
-  // PASSKEY UNLOCK
-  // ==============================================
+  // ============================================================
+  // CEK PASSKEY DARI URL (UNLOCK)
+  // ============================================================
   function checkPasskeyAndUnlock() {
     var urlParams = new URLSearchParams(window.location.search);
     var pass = urlParams.get('pass') || urlParams.get('unlocked');
-
     if (pass === VALID_PASSKEY || pass === 'true') {
+      isUnlocked = true;
       showMessage('🎉 Berhasil melewati Shortlink! Kunci Terbuka.', 'success');
       if (window.history && window.history.replaceState) {
         window.history.replaceState({}, document.title, window.location.pathname);
       }
-      loadPublicKeyFromFirebase(true);
+      loadAvailableKey();
     } else {
-      loadPublicKeyFromFirebase(false);
+      loadAvailableKey();
     }
   }
 
-  // ==============================================
-  // LOAD KEY FOR PUBLIC
-  // ==============================================
-  function loadPublicKeyFromFirebase(isUnlocked) {
+  // ============================================================
+  // LOAD KEY YANG BELUM DIPAKAI (is_active == false / hwid == "")
+  // ============================================================
+  function loadAvailableKey() {
     db.ref('keys').once('value').then(function(snapshot) {
       var data = snapshot.val();
       if (!data) {
-        if (isUnlocked) {
-          keyDisplay.textContent = 'No Key';
-          keyStatus.textContent = '⛔ EMPTY';
-          keyStatus.className = 'key-status expired';
-        } else showLockedState();
+        showNoKeyState('Database kosong.');
         return;
       }
 
       var now = Date.now();
-      var keysList = Object.keys(data).map(function(k) { return Object.assign({ id: k }, data[k]); });
-      // Cari key yang aktif (is_active === true) dan belum expired
-      var validKeys = keysList.filter(function(k) {
-        var isActive = (k.is_active === true || k.is_active === "true");
-        var notExpired = !k.expires_at || k.expires_at > now;
-        return isActive && notExpired;
+      var keysList = Object.keys(data).map(function(k) {
+        var obj = data[k];
+        obj.id = k;
+        return obj;
       });
 
-      if (validKeys.length === 0) {
-        if (isUnlocked) {
-          keyDisplay.textContent = 'No Active Key';
-          keyStatus.textContent = '⛔ EXPIRED';
-          keyStatus.className = 'key-status expired';
-        } else showLockedState();
+      // Filter: key yang BELUM dipakai (is_active == false atau hwid kosong) dan belum expired
+      var availableKeys = keysList.filter(function(k) {
+        var isActive = (k.is_active === true || k.is_active === "true");
+        var hasHwid = (k.hwid && k.hwid.length > 0);
+        var notExpired = !k.expires_at || k.expires_at > now;
+        // Yang tersedia: belum aktif (inactive) dan belum ada hwid, serta belum expired
+        return !isActive && !hasHwid && notExpired;
+      });
+
+      if (availableKeys.length === 0) {
+        // Cek apakah ada key aktif tapi sudah terpakai – beri tahu user
+        var activeKeys = keysList.filter(function(k) {
+          var isActive = (k.is_active === true || k.is_active === "true");
+          var hasHwid = (k.hwid && k.hwid.length > 0);
+          return isActive && hasHwid;
+        });
+        if (activeKeys.length > 0) {
+          showNoKeyState('✅ Key sudah aktif dan terikat perangkat. Tidak perlu mengambil key baru.');
+        } else {
+          showNoKeyState('⚠️ Tidak ada key tersedia. Hubungi admin.');
+        }
         return;
       }
 
-      var selected = validKeys[0];
-      currentUnlockedKey = selected;
-      if (isUnlocked) renderKey(selected);
-      else showLockedState();
+      // Ambil key pertama yang tersedia
+      currentKeyData = availableKeys[0];
+      renderKey(currentKeyData, isUnlocked);
     }).catch(function(err) {
+      console.error(err);
       showMessage('Error: ' + err.message, 'error');
+      keyDisplay.textContent = '⚠️ Error';
+      keyStatus.textContent = 'ERROR';
+      keyStatus.className = 'key-status expired';
     });
   }
 
-  function renderKey(keyData) {
-    if (!keyData) return;
-    var keyStr = keyData.key || keyData.id;
-    keyDisplay.textContent = keyStr;
-
-    var expiry = keyData.expires_at;
-    if (expiry) {
-      var diff = Math.floor((expiry - Date.now()) / 1000 / 60 / 60);
-      if (diff > 0) {
-        keyExpiry.innerHTML = '⏳ <strong>' + diff + ' jam</strong> tersisa · expires ' + new Date(expiry).toLocaleString();
-      } else {
-        keyExpiry.innerHTML = '⏰ <strong>EXPIRED</strong> · was ' + new Date(expiry).toLocaleString();
-      }
-    } else {
-      keyExpiry.innerHTML = '⏳ <strong>No expiry</strong>';
+  // ============================================================
+  // RENDER KEY
+  // ============================================================
+  function renderKey(keyData, unlocked) {
+    if (!keyData) {
+      showNoKeyState('Tidak ada key tersedia.');
+      return;
     }
-    keyStatus.textContent = '✅ UNLOCKED';
-    keyStatus.className = 'key-status';
-    copyBtn.style.display = 'inline-flex';
+
+    var keyStr = keyData.key || keyData.id || 'BX-XXXXXX';
+    var expiry = keyData.expires_at || 0;
+
+    if (unlocked) {
+      // Key terbuka – tampilkan asli
+      keyDisplay.textContent = keyStr;
+      if (expiry > 0) {
+        var diff = Math.floor((expiry - Date.now()) / 1000 / 60 / 60);
+        if (diff > 0) {
+          keyExpiry.innerHTML = '⏳ <strong>' + diff + ' jam</strong> tersisa · expires ' + new Date(expiry).toLocaleString();
+        } else {
+          keyExpiry.innerHTML = '⏰ <strong>EXPIRED</strong> · was ' + new Date(expiry).toLocaleString();
+        }
+      } else {
+        keyExpiry.innerHTML = '⏳ <strong>No expiry</strong>';
+      }
+      keyStatus.textContent = '✅ UNLOCKED';
+      keyStatus.className = 'key-status';
+      copyBtn.style.display = 'inline-flex';
+      getKeyBtn.textContent = '🔑 Key Tersedia';
+      getKeyBtn.disabled = true;
+    } else {
+      // Key terkunci – tampilkan LOCKED
+      keyDisplay.textContent = '🔒 LOCKED';
+      keyExpiry.innerHTML = '⏳ Klik <strong>GET KEY</strong> untuk melewati Shortlink.';
+      keyStatus.textContent = '🔒 LOCKED';
+      keyStatus.className = 'key-status locked';
+      copyBtn.style.display = 'none';
+      getKeyBtn.textContent = '🔗 GET KEY (SHORTLINK)';
+      getKeyBtn.disabled = false;
+    }
   }
 
-  function showLockedState() {
-    keyDisplay.textContent = 'LOCKED 🔒';
-    keyExpiry.innerHTML = '⏳ Klik <strong>GET KEY</strong> untuk lewati Shortlink.';
-    keyStatus.textContent = '🔒 LOCKED';
-    keyStatus.className = 'key-status locked';
+  function showNoKeyState(msg) {
+    keyDisplay.textContent = '—';
+    keyExpiry.innerHTML = '⏳ <strong>' + msg + '</strong>';
+    keyStatus.textContent = '⛔ EMPTY';
+    keyStatus.className = 'key-status empty';
     copyBtn.style.display = 'none';
+    getKeyBtn.textContent = '🔑 Tidak Ada Key';
+    getKeyBtn.disabled = true;
+    statusText.textContent = '⚠️ NO KEY';
+    statusText.className = 'value warning';
   }
 
-  // ==============================================
-  // SHORTLINK & COPY
-  // ==============================================
-  shortlinkBtn.onclick = function() {
-    var randomIndex = Math.floor(Math.random() * MOVE2LINK_LIST.length);
-    window.open(MOVE2LINK_LIST[randomIndex], '_blank');
+  // ============================================================
+  // TOMBOL GET KEY (BUKA SHORTLINK)
+  // ============================================================
+  getKeyBtn.onclick = function() {
+    if (this.disabled) return;
+    if (isUnlocked) {
+      showMessage('Key sudah terbuka! Salin key-nya.', 'success');
+      return;
+    }
+    // Buka shortlink di tab baru
+    window.open(SHORTLINK_URL, '_blank');
+    // Setelah user kembali dengan passkey, halaman akan reload dan unlock otomatis
+    showMessage('🔓 Shortlink dibuka. Kembali ke halaman ini untuk melihat key.', 'info');
   };
 
+  // ============================================================
+  // COPY KEY
+  // ============================================================
   copyBtn.onclick = function() {
-    var text = keyDisplay.textContent;
-    if (text.includes('LOCKED')) return;
+    if (!isUnlocked || !currentKeyData) {
+      alert('Lewati Shortlink terlebih dahulu!');
+      return;
+    }
+    var text = currentKeyData.key || currentKeyData.id || '';
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(function() {
         var orig = copyBtn.textContent;
         copyBtn.textContent = '✅ COPIED!';
         setTimeout(function() { copyBtn.textContent = orig; }, 2000);
       }).catch(function() { fallbackCopy(text); });
-    } else { fallbackCopy(text); }
+    } else {
+      fallbackCopy(text);
+    }
   };
   function fallbackCopy(text) {
     var ta = document.createElement('textarea');
@@ -310,9 +356,9 @@
     setTimeout(function() { copyBtn.textContent = orig; }, 2000);
   }
 
-  // ==============================================
-  // ADMIN LOGIN
-  // ==============================================
+  // ============================================================
+  // ADMIN LOGIN + PANEL (sama seperti sebelumnya)
+  // ============================================================
   adminBtn.onclick = function() {
     publicView.style.display = 'none';
     loginView.style.display = 'block';
@@ -320,16 +366,17 @@
     modeLabel.textContent = '🔐 Admin Access';
   };
 
-  backToPublicBtn.onclick = function() { goToPublicView(); };
-  backToPublicFromAdmin.onclick = function() { goToPublicView(); };
-  logoutBtn.onclick = function() { goToPublicView(); };
+  backToPublicBtn.onclick = function() { goToPublic(); };
+  backToPublicFromAdmin.onclick = function() { goToPublic(); };
+  logoutBtn.onclick = function() { goToPublic(); };
 
-  function goToPublicView() {
+  function goToPublic() {
     publicView.style.display = 'block';
     loginView.style.display = 'none';
     adminView.style.display = 'none';
-    modeLabel.textContent = 'Bypass Shortlink untuk mendapatkan Key Asli';
-    checkPasskeyAndUnlock();
+    modeLabel.textContent = 'Ambil key yang belum pernah dipakai';
+    isUnlocked = false;
+    loadAvailableKey();
   }
 
   loginBtn.onclick = function() {
@@ -358,7 +405,7 @@
         loginError.style.display = 'none';
         loginView.style.display = 'none';
         adminView.style.display = 'block';
-        modeLabel.textContent = '📋 Admin Panel · Realtime Database';
+        modeLabel.textContent = '📋 Admin Panel';
         loadAdminKeys();
       } else {
         loginError.textContent = '❌ Username atau password salah!';
@@ -370,14 +417,11 @@
     });
   };
 
-  // ==============================================
-  // ADMIN PANEL – LOAD + ACTIONS
-  // ==============================================
   function loadAdminKeys() {
     db.ref('keys').once('value').then(function(snapshot) {
       var data = snapshot.val();
       if (!data) {
-        adminTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Database Kosong</td></tr>';
+        adminTableBody.innerHTML = '<tr><td colspan="4">Tidak ada key.</td></tr>';
         adminKeyCount.textContent = '0';
         return;
       }
@@ -405,79 +449,21 @@
         }
         var expiryStr = k.expires_at ? new Date(k.expires_at).toLocaleString() : '—';
         var hwid = k.hwid || '—';
-
         html += '<tr>' +
           '<td><strong>' + (k.key || k.id) + '</strong></td>' +
           '<td><span class="status-badge ' + statusClass + '">' + statusText + '</span></td>' +
           '<td>' + expiryStr + '</td>' +
           '<td>' + hwid + '</td>' +
-          '<td><div class="action-btns">' +
-            '<button class="btn btn-warning btn-sm" data-id="' + k.id + '" data-action="toggle">Toggle</button>' +
-            '<button class="btn btn-danger btn-sm" data-id="' + k.id + '" data-action="reset">Reset HWID</button>' +
-            '<button class="btn btn-danger btn-sm" data-id="' + k.id + '" data-action="delete">Delete</button>' +
-          '</div></td>' +
           '</tr>';
       });
       adminTableBody.innerHTML = html;
       adminKeyCount.textContent = keysList.length;
-
-      // Attach event listeners to action buttons
-      document.querySelectorAll('#adminTableBody .btn').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-          var id = this.dataset.id;
-          var action = this.dataset.action;
-          if (action === 'toggle') {
-            toggleActive(id);
-          } else if (action === 'reset') {
-            resetHwid(id);
-          } else if (action === 'delete') {
-            deleteKey(id);
-          }
-        });
-      });
     });
   }
 
-  // ==============================================
-  // ADMIN ACTIONS (PATCH KE FIREBASE)
-  // ==============================================
-  function toggleActive(id) {
-    // Toggle is_active
-    db.ref('keys/' + id + '/is_active').once('value').then(function(snap) {
-      var current = snap.val();
-      var newVal = !(current === true || current === "true");
-      db.ref('keys/' + id + '/is_active').set(newVal).then(function() {
-        showMessage('✅ is_active toggled to ' + newVal, 'success');
-        loadAdminKeys();
-      }).catch(function(err) {
-        showMessage('Error: ' + err.message, 'error');
-      });
-    });
-  }
-
-  function resetHwid(id) {
-    db.ref('keys/' + id + '/hwid').set('').then(function() {
-      showMessage('✅ HWID reset untuk key ' + id, 'success');
-      loadAdminKeys();
-    }).catch(function(err) {
-      showMessage('Error: ' + err.message, 'error');
-    });
-  }
-
-  function deleteKey(id) {
-    if (confirm('Yakin ingin menghapus key ' + id + '?')) {
-      db.ref('keys/' + id).remove().then(function() {
-        showMessage('✅ Key ' + id + ' dihapus.', 'success');
-        loadAdminKeys();
-      }).catch(function(err) {
-        showMessage('Error: ' + err.message, 'error');
-      });
-    }
-  }
-
-  // ==============================================
+  // ============================================================
   // START
-  // ==============================================
+  // ============================================================
   checkPasskeyAndUnlock();
 </script>
 </body>
