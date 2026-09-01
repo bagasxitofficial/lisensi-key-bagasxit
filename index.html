@@ -111,29 +111,24 @@
 
   function init() {
     var params = new URLSearchParams(window.location.search);
-    var versionParam = params.get('v');
-    var isWaitingShortlink = localStorage.getItem('waiting_shortlink');
+    var versionParam = params.get('v'); // Mendeteksi ?v=1, ?v=2, ?v=4, dst.
+    var tokenParam = params.get('token') || params.get('pass');
     var isAdmin = params.get('admin');
 
     if (isAdmin === 'true' || isAdmin === '1') {
       adminPanel.style.display = 'block';
     }
 
-    // SYARAT KUNCI DIBUKA:
-    // User membawa parameter ?v=... DAN memiliki penanda 'waiting_shortlink' di browsernya
-    if (versionParam && isWaitingShortlink === 'true') {
-      // Langsung hapus penanda agar URL tidak bisa di-refresh untuk klaim berulang
-      localStorage.removeItem('waiting_shortlink');
-      
-      // Bersihkan parameter dari URL browser
+    // JIKA USER KEMBALI DENGAN PARAMETER Shortlink (?v=1..1000)
+    if (versionParam || tokenParam) {
       if (window.history && window.history.replaceState) {
         window.history.replaceState({}, document.title, window.location.pathname);
       }
       
-      // Panggil fungsi pembuat key
+      // LANGSUNG MEMPROSES / MENAMPILKAN KEY
       handleUserGetNewKey();
     } else {
-      // Jika tidak memenuhi syarat, cek apakah HP user sudah punya key aktif sebelumnya
+      // Jika URL polos tanpa ?v=, cek apakah di HP user ada key aktif
       checkDeviceExistingKey();
     }
   }
@@ -204,9 +199,6 @@
   }
 
   getBtn.onclick = function() {
-    // TANDAI BROWSER USER BAHWA MEREKA SEDANG MELEWATI SHORTLINK
-    localStorage.setItem('waiting_shortlink', 'true');
-
     var todayStr = new Date().toISOString().slice(0, 10);
     var usedHistory = JSON.parse(localStorage.getItem('used_links_history') || '{}');
     
@@ -232,7 +224,7 @@
     usedHistory.links.push(targetUrl);
     localStorage.setItem('used_links_history', JSON.stringify(usedHistory));
 
-    // Pindah ke shortlink di tab saat ini agar tidak terblokir pop-up blocker HP
+    // MENGARAHKAN LANGSUNG DI TAB SAAT INI AGAR TIDAK DIBLOKIR BROWSER HP
     window.location.href = targetUrl;
   };
 
