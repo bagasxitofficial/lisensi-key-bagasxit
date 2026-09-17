@@ -4,36 +4,73 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="robots" content="noindex, nofollow" />
-  <title>BAGASXIT · OFFICIAL KEY SYSTEM</title>
+  <title>BAGASXIT · KEY SYSTEM</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', monospace; }
-    body { background: #0F0B21; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .container { max-width: 500px; width: 100%; background: #1A153B; border-radius: 24px; padding: 30px; border: 1px solid #3B2D6B; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
-    .badge { background: rgba(168,85,247,0.15); color: #A855F7; font-size: 11px; font-weight: 700; padding: 6px 16px; border-radius: 20px; display: inline-block; margin-bottom: 15px; border: 1px solid rgba(168,85,247,0.2); }
-    h1 { color: #fff; font-size: 24px; margin-bottom: 20px; font-weight: 800; }
-    h1 span { color: #A855F7; }
-    .key-box { background: #0F0B21; border-radius: 16px; padding: 24px; border: 1px solid #3B2D6B; margin-bottom: 20px; }
-    .key-value { font-size: 26px; font-weight: 700; color: #10B981; letter-spacing: 2px; word-break: break-all; margin: 12px 0; }
-    .btn { width: 100%; padding: 14px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; background: #A855F7; color: #fff; font-size: 14px; margin-top: 10px; display: none; }
-    .btn-copy { background: #10B981; display: none; }
-    .info { color: #8E8AA7; font-size: 13px; margin-top: 15px; }
-    
-    .turnstile-box {
-      background: #0F0B21;
-      border: 1px solid #3B2D6B;
-      border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 15px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 4px 15px rgba(168, 85, 247, 0.1);
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body {
+      background: radial-gradient(circle at top left, #1A153B 0%, #0F0B21 50%, #000 100%);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
     }
-
-    .admin-panel { display: none; margin-top: 25px; padding-top: 20px; border-top: 1px dashed #3B2D6B; text-align: left; }
-    .admin-panel h3 { color: #A855F7; font-size: 14px; margin-bottom: 10px; text-align: center; }
-    .admin-input { width: 100%; padding: 10px; margin-bottom: 10px; background: #0F0B21; border: 1px solid #3B2D6B; border-radius: 8px; color: #fff; font-size: 12px; }
-    .btn-admin { background: #10B981; color: #fff; padding: 10px; border: none; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; font-size: 12px; }
+    .container {
+      max-width: 460px; width: 100%; background: rgba(26, 21, 59, 0.85);
+      border-radius: 28px; padding: 32px 28px; border: 1px solid #3B2D6B;
+      text-align: center; box-shadow: 0 20px 60px rgba(168, 85, 247, 0.25);
+      backdrop-filter: blur(20px);
+    }
+    .logo {
+      font-size: 32px; font-weight: 900; letter-spacing: 2px;
+      background: linear-gradient(135deg, #A855F7 0%, #06B6D4 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+    .subtitle { color: #7C6CA8; font-size: 11px; letter-spacing: 3px; margin-bottom: 24px; }
+    .badge {
+      background: rgba(168, 85, 247, 0.12); color: #A855F7; font-size: 10px;
+      font-weight: 700; padding: 6px 14px; border-radius: 20px;
+      display: inline-block; margin-bottom: 20px; border: 1px solid rgba(168, 85, 247, 0.3);
+      letter-spacing: 1px;
+    }
+    .key-box {
+      background: #0F0B21; border-radius: 18px; padding: 22px;
+      border: 1px solid #3B2D6B; margin-bottom: 18px; position: relative; overflow: hidden;
+    }
+    .key-box::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, #A855F7, transparent);
+    }
+    .key-label { color: #7C6CA8; font-size: 10px; letter-spacing: 2px; margin-bottom: 8px; }
+    .key-value {
+      font-size: 24px; font-weight: 800; color: #10B981;
+      letter-spacing: 2px; word-break: break-all; margin: 10px 0;
+      font-family: 'Courier New', monospace;
+    }
+    .key-timer { color: #8E8AA7; font-size: 11px; margin-top: 8px; }
+    .btn {
+      width: 100%; padding: 15px; border-radius: 14px; font-weight: 700;
+      border: none; cursor: pointer; font-size: 13px; letter-spacing: 1px;
+      transition: transform 0.15s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary {
+      background: linear-gradient(135deg, #A855F7, #6366F1); color: #fff;
+      box-shadow: 0 8px 24px rgba(168, 85, 247, 0.4); display: none;
+    }
+    .btn-copy {
+      background: linear-gradient(135deg, #10B981, #059669); color: #fff;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4); display: none; margin-top: 10px;
+    }
+    .info { color: #8E8AA7; font-size: 12px; margin-top: 16px; line-height: 1.6; }
+    .turnstile-box {
+      background: #0F0B21; border: 1px solid #3B2D6B; border-radius: 14px;
+      padding: 14px; margin-bottom: 16px; display: flex;
+      justify-content: center; align-items: center;
+    }
+    .footer {
+      color: #4B4370; font-size: 10px; margin-top: 24px;
+      padding-top: 16px; border-top: 1px solid #2A1F4D;
+      letter-spacing: 1px;
+    }
+    .footer a { color: #A855F7; text-decoration: none; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
@@ -42,33 +79,33 @@
 <body>
 
 <div class="container">
-  <div class="badge">🗿OFFICIAL GENERATOR🗿</div>
-  <h1><span>BAGASXIT</span> KEY SYSTEM</h1>
+  <div class="logo">BAGASXIT</div>
+  <div class="subtitle">OFFICIAL KEY SYSTEM</div>
+
+  <div class="badge">PREMIUM ACCESS</div>
 
   <div class="key-box">
-    <div style="color:#8E8AA7; font-size:12px;">LISENSI ANDA:</div>
+    <div class="key-label">YOUR LICENSE KEY</div>
     <div class="key-value" id="keyDisplay">LOCKED 🔒</div>
-    <div style="color:#8E8AA7; font-size:12px;" id="keyTimer">Status: Lewati verifikasi & shortlink untuk klaim key</div>
+    <div class="key-timer" id="keyTimer">Complete steps to get your key</div>
   </div>
 
   <div class="turnstile-box" id="turnstileBox">
-    <div class="cf-turnstile" 
-         data-sitekey="0x4AAAAAAEj14KP8CTCRFU1x" 
+    <div class="cf-turnstile"
+         data-sitekey="0x4AAAAAAEj14KP8CTCRFU1x"
          data-callback="onTurnstileSuccess"
          data-theme="dark">
     </div>
   </div>
 
-  <button class="btn" id="getBtn">GENERATE KEY</button>
-  <button class="btn btn-copy" id="copyBtn">COPY KEY</button>
+  <button class="btn btn-primary" id="getBtn">CONTINUE →</button>
+  <button class="btn btn-copy" id="copyBtn">📋 COPY KEY</button>
 
-  <div class="info" id="statusInfo">Please complete the security verification above.</div>
+  <div class="info" id="statusInfo">Complete the security check above to continue.</div>
 
-  <div class="admin-panel" id="adminPanel">
-    <h3>👑 WEB ADMIN PANEL</h3>
-    <input type="text" id="customKey" class="admin-input" placeholder="Custom Key (Opsional / Kosongkan utk Auto)">
-    <input type="number" id="customHours" class="admin-input" placeholder="Durasi (Jam)" value="5">
-    <button class="btn-admin" id="btnAdminGen">🗿GENERATE KEY ADMIN🗿</button>
+  <div class="footer">
+    <a href="https://t.me/BagasXIT">Telegram</a> ·
+    <a href="https://whatsapp.com/channel/0029Vb6Eyam7oQhZLQKN9E3P">WhatsApp</a>
   </div>
 </div>
 
@@ -85,124 +122,72 @@
     'https://move2link.co/533d7d3',
     'https://move2link.co/ff6341a'
   ];
-  
+
   var DURATION_HOURS = 5;
+  var WAITING_KEY = 'bagasxit_waiting';
+  var USER_KEY_STORE = 'bagasxit_user_key';
+  var LAST_GEN_KEY = 'bagasxit_last_gen';
 
   var keyDisplay = document.getElementById('keyDisplay');
   var keyTimer = document.getElementById('keyTimer');
   var getBtn = document.getElementById('getBtn');
   var copyBtn = document.getElementById('copyBtn');
   var statusInfo = document.getElementById('statusInfo');
-  var adminPanel = document.getElementById('adminPanel');
   var turnstileBox = document.getElementById('turnstileBox');
 
   function onTurnstileSuccess(token) {
     turnstileBox.style.display = "none";
     getBtn.style.display = "block";
-    statusInfo.textContent = "✅ Verification complete. Click GENERATE KEY below to proceed.";
+    statusInfo.textContent = "✅ Verification complete. Click CONTINUE to proceed.";
   }
 
   function init() {
     var params = new URLSearchParams(window.location.search);
     var versionParam = params.get('v');
-    var isWaiting = localStorage.getItem('waiting_shortlink');
-    var isAdmin = params.get('admin');
-
-    // PENGECEKAN REFERRER: Memastikan asal usul pengakses berasal dari Move2link
+    var isWaiting = localStorage.getItem(WAITING_KEY);
     var referrer = document.referrer.toLowerCase();
-    var isFromMove2link = referrer.includes('move2link');
+    var isFromShortlink = referrer.includes('move2link');
 
-    if (isAdmin === 'true' || isAdmin === '1') {
-      adminPanel.style.display = 'block';
-    }
-
-    // SYARAT GENERATE KEY:
-    // Punya parameter ?v= DAN (Memiliki LocalStorage Session ATAU Memang Datang Langsung dari Move2link)
-    if (versionParam && (isWaiting || isFromMove2link)) {
-      localStorage.removeItem('waiting_shortlink');
-
+    // Kalau kembali dari shortlink → generate key
+    if (versionParam && (isWaiting || isFromShortlink)) {
+      localStorage.removeItem(WAITING_KEY);
       if (window.history && window.history.replaceState) {
         window.history.replaceState({}, document.title, window.location.pathname);
       }
-      
-      handleUserGetNewKey();
+      handleGenerate();
     } else {
-      // Jika ditembak manual tanpa rujukan Move2link/Session, kunci ditegakkan
-      checkDeviceExistingKey();
+      checkExistingKey();
     }
   }
 
-  function checkDeviceExistingKey() {
-    var savedKey = localStorage.getItem('bagasxit_user_key');
-    if (savedKey) {
-      db.ref('keys/' + savedKey).once('value').then(function(snap) {
-        var data = snap.val();
-        if (data && data.expires_at > Date.now() && data.is_active) {
-          showActiveKey(savedKey, DURATION_HOURS + " Jam (Aktif)");
-        } else {
-          localStorage.removeItem('bagasxit_user_key');
-        }
-      });
-    }
-  }
+  function checkExistingKey() {
+    var savedKey = localStorage.getItem(USER_KEY_STORE);
+    if (!savedKey) return;
 
-  function handleUserGetNewKey() {
-    var savedKey = localStorage.getItem('bagasxit_user_key');
-    if (savedKey) {
-      db.ref('keys/' + savedKey).once('value').then(function(snap) {
-        var data = snap.val();
-        if (data && data.expires_at > Date.now() && data.is_active) {
-          showActiveKey(savedKey, DURATION_HOURS + " Jam (Aktif)");
-          return;
-        }
-        createNewKeyInFirebase(null, DURATION_HOURS);
-      });
-    } else {
-      createNewKeyInFirebase(null, DURATION_HOURS);
-    }
-  }
-
-  function createNewKeyInFirebase(customName, hours) {
-    statusInfo.textContent = "⚙️ Memverifikasi data & membuat key...";
-    var randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    var newKey = customName ? customName.trim() : ("BX-" + randomCode);
-    var now = Date.now();
-    var durationMs = hours * 3600 * 1000;
-
-    var payload = {
-      key: newKey,
-      created_at: now,
-      expires_at: now + durationMs,
-      duration_ms: durationMs,
-      expires_at_str: hours + " Jam (Aktif)",
-      is_active: true,
-      hwid: "",
-      assigned_to: customName ? "Admin Web" : "Web Auto-Gen"
-    };
-
-    db.ref('keys/' + newKey).set(payload).then(function() {
-      if (!customName) {
-        localStorage.setItem('bagasxit_user_key', newKey);
+    db.ref('keys/' + savedKey).once('value').then(function(snap) {
+      var data = snap.val();
+      if (data && data.expires_at > Date.now() && data.is_active) {
+        showActiveKey(savedKey, formatRemaining(data.expires_at));
+      } else {
+        localStorage.removeItem(USER_KEY_STORE);
       }
-      showActiveKey(newKey, hours + " Jam (Aktif)");
     });
   }
 
-  function showActiveKey(key, durationText) {
-    keyDisplay.textContent = key;
-    keyTimer.textContent = "Masa Aktif: " + durationText;
-    statusInfo.textContent = "✅ Key successfully generated! Copy and paste the key into APKMODS.";
-    turnstileBox.style.display = "none";
-    getBtn.style.display = "none";
-    copyBtn.style.display = "block";
-  }
-
   getBtn.onclick = function() {
-    localStorage.setItem('waiting_shortlink', Date.now().toString());
+    var lastGen = localStorage.getItem(LAST_GEN_KEY);
+    if (lastGen && (Date.now() - parseInt(lastGen)) < 5 * 3600 * 1000) {
+      var sisaJam = Math.ceil((5 * 3600 * 1000 - (Date.now() - parseInt(lastGen))) / 3600000);
+      statusInfo.textContent = "⚠️ Please wait " + sisaJam + " more hour(s) before generating a new key.";
+      return;
+    }
 
+    // Set flag waiting
+    localStorage.setItem(WAITING_KEY, Date.now().toString());
+
+    // Pilih shortlink random (hindari yang udah dipake hari ini)
     var todayStr = new Date().toISOString().slice(0, 10);
     var usedHistory = JSON.parse(localStorage.getItem('used_links_history') || '{}');
-    
     if (usedHistory.date !== todayStr) {
       usedHistory = { date: todayStr, links: [] };
     }
@@ -211,34 +196,72 @@
       return !usedHistory.links.includes(link);
     });
 
-    var targetUrl = "";
-
+    var targetUrl;
     if (unusedLinks.length > 0) {
-      var randIndex = Math.floor(Math.random() * unusedLinks.length);
-      targetUrl = unusedLinks[randIndex];
+      targetUrl = unusedLinks[Math.floor(Math.random() * unusedLinks.length)];
     } else {
       usedHistory.links = [];
-      var randIndex = Math.floor(Math.random() * SHORTLINK_URLS.length);
-      targetUrl = SHORTLINK_URLS[randIndex];
+      targetUrl = SHORTLINK_URLS[Math.floor(Math.random() * SHORTLINK_URLS.length)];
     }
 
     usedHistory.links.push(targetUrl);
     localStorage.setItem('used_links_history', JSON.stringify(usedHistory));
 
-    window.location.href = targetUrl;
+    statusInfo.textContent = "🔗 Redirecting to verification...";
+
+    setTimeout(function() {
+      window.location.href = targetUrl;
+    }, 500);
   };
+
+  function handleGenerate() {
+    statusInfo.textContent = "⚙️ Generating your key...";
+    var randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    var newKey = "BX-" + randomCode;
+    var now = Date.now();
+    var durationMs = DURATION_HOURS * 3600 * 1000;
+
+    var payload = {
+      key: newKey,
+      created_at: now,
+      expires_at: now + durationMs,
+      duration_ms: durationMs,
+      is_active: true,
+      hwid: "",
+      assigned_to: "Auto-Gen"
+    };
+
+    db.ref('keys/' + newKey).set(payload).then(function() {
+      localStorage.setItem(USER_KEY_STORE, newKey);
+      localStorage.setItem(LAST_GEN_KEY, now.toString());
+      showActiveKey(newKey, DURATION_HOURS + " hours");
+    }).catch(function(err) {
+      statusInfo.textContent = "❌ Error: " + err.message;
+    });
+  }
+
+  function showActiveKey(key, durationText) {
+    keyDisplay.textContent = key;
+    keyTimer.textContent = "Valid for: " + durationText;
+    statusInfo.textContent = "✅ Key generated! Copy and paste it into BAGASXIT app.";
+    turnstileBox.style.display = "none";
+    getBtn.style.display = "none";
+    copyBtn.style.display = "block";
+  }
+
+  function formatRemaining(expiresAt) {
+    var ms = expiresAt - Date.now();
+    if (ms <= 0) return "Expired";
+    var h = Math.floor(ms / 3600000);
+    var m = Math.floor((ms % 3600000) / 60000);
+    return h + "h " + m + "m remaining";
+  }
 
   copyBtn.onclick = function() {
-    navigator.clipboard.writeText(keyDisplay.textContent);
-    copyBtn.textContent = "✅ Successfully copied!";
-    setTimeout(() => { copyBtn.textContent = "📋 COPY KEY"; }, 2000);
-  };
-
-  document.getElementById('btnAdminGen').onclick = function() {
-    var cKey = document.getElementById('customKey').value;
-    var cHours = parseFloat(document.getElementById('customHours').value) || 5;
-    createNewKeyInFirebase(cKey, cHours);
-    alert("Key Admin Berhasil Dibuat!");
+    navigator.clipboard.writeText(keyDisplay.textContent).then(function() {
+      copyBtn.textContent = "✅ COPIED!";
+      setTimeout(function() { copyBtn.textContent = "📋 COPY KEY"; }, 2000);
+    });
   };
 
   init();
