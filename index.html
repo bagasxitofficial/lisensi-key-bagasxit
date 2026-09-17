@@ -142,23 +142,34 @@
   }
 
   function init() {
-    var params = new URLSearchParams(window.location.search);
-    var versionParam = params.get('v');
-    var isWaiting = localStorage.getItem(WAITING_KEY);
-    var referrer = document.referrer.toLowerCase();
-    var isFromShortlink = referrer.includes('move2link');
+  var params = new URLSearchParams(window.location.search);
+  var versionParam = params.get('v');
+  var isWaiting = localStorage.getItem(WAITING_KEY);
+  var referrer = document.referrer.toLowerCase();
+  var isFromShortlink = referrer.includes('move2link');
 
-    // Kalau kembali dari shortlink → generate key
-    if (versionParam && (isWaiting || isFromShortlink)) {
-      localStorage.removeItem(WAITING_KEY);
-      if (window.history && window.history.replaceState) {
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-      handleGenerate();
+  // Validasi: flag waiting cuma berlaku 5 menit
+  var waitingValid = false;
+  if (isWaiting) {
+    var elapsed = Date.now() - parseInt(isWaiting);
+    if (elapsed < 5 * 60 * 1000) {
+      waitingValid = true;
     } else {
-      checkExistingKey();
+      localStorage.removeItem(WAITING_KEY);
     }
   }
+
+  // Generate key: butuh versionParam DAN (waiting valid ATAU dari shortlink)
+  if (versionParam && (waitingValid || isFromShortlink)) {
+    localStorage.removeItem(WAITING_KEY);
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    handleGenerate();
+  } else {
+    checkExistingKey();
+  }
+}
 
   function checkExistingKey() {
     var savedKey = localStorage.getItem(USER_KEY_STORE);
