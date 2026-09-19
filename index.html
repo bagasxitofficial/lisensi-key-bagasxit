@@ -59,6 +59,15 @@
       background: linear-gradient(135deg, #10B981, #059669); color: #fff;
       box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4); display: none; margin-top: 10px;
     }
+    .btn-reset {
+      background: linear-gradient(135deg, #F59E0B, #D97706); color: #fff;
+      box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4); margin-top: 10px;
+    }
+    .btn-wa {
+      background: linear-gradient(135deg, #25D366, #128C7E); color: #fff;
+      box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4); margin-top: 10px;
+      text-decoration: none; display: inline-block; text-align: center;
+    }
     .info { color: #8E8AA7; font-size: 12px; margin-top: 16px; line-height: 1.6; }
     .turnstile-box {
       background: #0F0B21; border: 1px solid #3B2D6B; border-radius: 14px;
@@ -71,6 +80,7 @@
       letter-spacing: 1px;
     }
     .footer a { color: #A855F7; text-decoration: none; }
+    .hidden { display: none !important; }
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -103,6 +113,14 @@
   <button class="btn btn-primary" id="getBtn">CONTINUE →</button>
   <button class="btn btn-copy" id="copyBtn">📋 COPY KEY</button>
 
+  <!-- Reset HWID Section -->
+  <div id="resetSection" class="hidden" style="margin-top:20px;">
+    <div class="key-label" style="margin-bottom:10px;">RESET HWID (Max 2x)</div>
+    <div class="key-timer" id="resetInfo">HWID reset available</div>
+    <button class="btn btn-reset" id="resetBtn" style="display:block;">🔄 RESET HWID</button>
+    <a href="https://wa.me/6281234567890" class="btn btn-wa hidden" id="waBtn" target="_blank">📱 CONTACT ADMIN</a>
+  </div>
+
   <div class="info" id="statusInfo">Complete the security check above to continue.</div>
 
   <div class="footer">
@@ -112,7 +130,6 @@
 </div>
 
 <script>
-  // ═══ Firebase Config ═══
   var firebaseConfig = {
     apiKey: "AIzaSyCn3vFJpy37tJfyu_P1xYZ5jCUcGVCtT3U",
     authDomain: "bagasxit-official.firebaseapp.com",
@@ -123,16 +140,13 @@
     appId: "1:613462485191:web:f56ab40a53c3441604f6e2"
   };
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-
   var db = firebase.database();
   var auth = firebase.auth();
 
-  // Anonymous sign-in — biar bisa nulis ke DB
   auth.signInAnonymously().catch(function(err) {
     console.error("Anonymous auth failed:", err);
   });
 
-  // ═══ Config Shortlink ═══
   var SHORTLINK_URLS = [
     'https://move2link.co/d6e38d7',
     'https://move2link.co/74b15b4',
@@ -146,6 +160,7 @@
   var WAITING_KEY = 'bagasxit_waiting';
   var USER_KEY_STORE = 'bagasxit_user_key';
   var LAST_GEN_KEY = 'bagasxit_last_gen';
+  var RESET_LIMIT = 2;
 
   var keyDisplay = document.getElementById('keyDisplay');
   var keyTimer = document.getElementById('keyTimer');
@@ -153,6 +168,12 @@
   var copyBtn = document.getElementById('copyBtn');
   var statusInfo = document.getElementById('statusInfo');
   var turnstileBox = document.getElementById('turnstileBox');
+  var resetSection = document.getElementById('resetSection');
+  var resetBtn = document.getElementById('resetBtn');
+  var resetInfo = document.getElementById('resetInfo');
+  var waBtn = document.getElementById('waBtn');
+
+  var currentKey = "";
 
   function onTurnstileSuccess(token) {
     turnstileBox.style.display = "none";
@@ -170,11 +191,8 @@
     var waitingValid = false;
     if (isWaiting) {
       var elapsed = Date.now() - parseInt(isWaiting);
-      if (elapsed < 5 * 60 * 1000) {
-        waitingValid = true;
-      } else {
-        localStorage.removeItem(WAITING_KEY);
-      }
+      if (elapsed < 5 * 60 * 1000) waitingValid = true;
+      else localStorage.removeItem(WAITING_KEY);
     }
 
     if (versionParam && (waitingValid || isFromShortlink)) {
@@ -195,6 +213,7 @@
     db.ref('keys/' + savedKey).once('value').then(function(snap) {
       var data = snap.val();
       if (data && data.expires_at > Date.now() && data.is_active) {
+        currentKey = savedKey;
         showActiveKey(savedKey, formatRemaining(data.expires_at));
       } else {
         localStorage.removeItem(USER_KEY_STORE);
@@ -214,9 +233,7 @@
 
     var todayStr = new Date().toISOString().slice(0, 10);
     var usedHistory = JSON.parse(localStorage.getItem('used_links_history') || '{}');
-    if (usedHistory.date !== todayStr) {
-      usedHistory = { date: todayStr, links: [] };
-    }
+    if (usedHistory.date !== todayStr) usedHistory = { date: todayStr, links: [] };
 
     var unusedLinks = SHORTLINK_URLS.filter(function(link) {
       return !usedHistory.links.includes(link);
@@ -255,36 +272,100 @@
       is_active: true,
       hwid: "",
       assigned_to: "Auto-Gen",
-      source: "web"
+      source: "web",
+      reset_count: 0,
+      last_reset: 0
     };
 
     function writeKey() {
       db.ref('keys/' + newKey).set(payload).then(function() {
         localStorage.setItem(USER_KEY_STORE, newKey);
         localStorage.setItem(LAST_GEN_KEY, now.toString());
+        currentKey = newKey;
         showActiveKey(newKey, DURATION_HOURS + " hours");
       }).catch(function(err) {
         statusInfo.textContent = "❌ Error: " + err.message;
       });
     }
 
-    if (auth.currentUser) {
-      writeKey();
-    } else {
-      auth.signInAnonymously().then(writeKey).catch(function(err) {
-        statusInfo.textContent = "❌ Auth error: " + err.message;
-      });
-    }
+    if (auth.currentUser) writeKey();
+    else auth.signInAnonymously().then(writeKey).catch(function(err) {
+      statusInfo.textContent = "❌ Auth error: " + err.message;
+    });
   }
 
   function showActiveKey(key, durationText) {
     keyDisplay.textContent = key;
     keyTimer.textContent = "Valid for: " + durationText;
-    statusInfo.textContent = "✅ Key generated! Copy and paste it into BAGASXIT app.";
+    statusInfo.textContent = "✅ Key active. Copy and paste it into BAGASXIT app.";
     turnstileBox.style.display = "none";
     getBtn.style.display = "none";
     copyBtn.style.display = "block";
+
+    // Cek reset info
+    db.ref('keys/' + key + '/reset_count').once('value').then(function(snap) {
+      var count = snap.val() || 0;
+      updateResetUI(key, count);
+    });
   }
+
+  function updateResetUI(key, resetCount) {
+    resetSection.classList.remove('hidden');
+
+    if (resetCount >= RESET_LIMIT) {
+      resetInfo.textContent = "⚠️ Reset limit reached (" + resetCount + "/" + RESET_LIMIT + ")";
+      resetBtn.style.display = "none";
+      waBtn.classList.remove('hidden');
+    } else {
+      resetInfo.textContent = "Reset available: " + (RESET_LIMIT - resetCount) + "x remaining";
+      resetBtn.style.display = "block";
+      waBtn.classList.add('hidden');
+    }
+  }
+
+  resetBtn.onclick = function() {
+    if (!currentKey) return;
+
+    if (!confirm("Reset HWID for this key?\n\nYou will be able to use it on a new device.\nThis cannot be undone.")) {
+      return;
+    }
+
+    db.ref('keys/' + currentKey).once('value').then(function(snap) {
+      var data = snap.val();
+      if (!data) {
+        alert("Key not found");
+        return;
+      }
+
+      var resetCount = data.reset_count || 0;
+      if (resetCount >= RESET_LIMIT) {
+        alert("Reset limit reached");
+        return;
+      }
+
+      var now = Date.now();
+
+      db.ref('keys/' + currentKey).update({
+        hwid: "",
+        reset_count: resetCount + 1,
+        last_reset: now
+      }).then(function() {
+        // Log
+        db.ref('activity_logs').push({
+          action: "Web Reset HWID: " + currentKey + " (reset #" + (resetCount + 1) + ")",
+          timestamp: now
+        });
+
+        statusInfo.textContent = "✅ HWID reset. Ready to use on new device.";
+        updateResetUI(currentKey, resetCount + 1);
+        setTimeout(function() {
+          alert("✅ HWID reset successful!\n\nYou can now use this key on your new device.");
+        }, 300);
+      }).catch(function(err) {
+        alert("Error: " + err.message);
+      });
+    });
+  };
 
   function formatRemaining(expiresAt) {
     var ms = expiresAt - Date.now();
