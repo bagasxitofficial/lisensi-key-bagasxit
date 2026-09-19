@@ -72,7 +72,9 @@
     }
     .footer a { color: #A855F7; text-decoration: none; }
   </style>
+
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
@@ -110,10 +112,27 @@
 </div>
 
 <script>
-  var firebaseConfig = { databaseURL: "https://bagasxit-official-default-rtdb.firebaseio.com" };
+  // ═══ Firebase Config ═══
+  var firebaseConfig = {
+    apiKey: "AIzaSyCn3vFJpy37tJfyu_P1xYZ5jCUcGVCtT3U",
+    authDomain: "bagasxit-official.firebaseapp.com",
+    databaseURL: "https://bagasxit-official-default-rtdb.firebaseio.com",
+    projectId: "bagasxit-official",
+    storageBucket: "bagasxit-official.firebasestorage.app",
+    messagingSenderId: "613462485191",
+    appId: "1:613462485191:web:f56ab40a53c3441604f6e2"
+  };
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  var db = firebase.database();
 
+  var db = firebase.database();
+  var auth = firebase.auth();
+
+  // Anonymous sign-in — biar bisa nulis ke DB
+  auth.signInAnonymously().catch(function(err) {
+    console.error("Anonymous auth failed:", err);
+  });
+
+  // ═══ Config Shortlink ═══
   var SHORTLINK_URLS = [
     'https://move2link.co/d6e38d7',
     'https://move2link.co/74b15b4',
@@ -142,34 +161,32 @@
   }
 
   function init() {
-  var params = new URLSearchParams(window.location.search);
-  var versionParam = params.get('v');
-  var isWaiting = localStorage.getItem(WAITING_KEY);
-  var referrer = document.referrer.toLowerCase();
-  var isFromShortlink = referrer.includes('move2link');
+    var params = new URLSearchParams(window.location.search);
+    var versionParam = params.get('v');
+    var isWaiting = localStorage.getItem(WAITING_KEY);
+    var referrer = document.referrer.toLowerCase();
+    var isFromShortlink = referrer.includes('move2link');
 
-  // Validasi: flag waiting cuma berlaku 5 menit
-  var waitingValid = false;
-  if (isWaiting) {
-    var elapsed = Date.now() - parseInt(isWaiting);
-    if (elapsed < 5 * 60 * 1000) {
-      waitingValid = true;
-    } else {
+    var waitingValid = false;
+    if (isWaiting) {
+      var elapsed = Date.now() - parseInt(isWaiting);
+      if (elapsed < 5 * 60 * 1000) {
+        waitingValid = true;
+      } else {
+        localStorage.removeItem(WAITING_KEY);
+      }
+    }
+
+    if (versionParam && (waitingValid || isFromShortlink)) {
       localStorage.removeItem(WAITING_KEY);
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      handleGenerate();
+    } else {
+      checkExistingKey();
     }
   }
-
-  // Generate key: butuh versionParam DAN (waiting valid ATAU dari shortlink)
-  if (versionParam && (waitingValid || isFromShortlink)) {
-    localStorage.removeItem(WAITING_KEY);
-    if (window.history && window.history.replaceState) {
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-    handleGenerate();
-  } else {
-    checkExistingKey();
-  }
-}
 
   function checkExistingKey() {
     var savedKey = localStorage.getItem(USER_KEY_STORE);
@@ -193,10 +210,8 @@
       return;
     }
 
-    // Set flag waiting
     localStorage.setItem(WAITING_KEY, Date.now().toString());
 
-    // Pilih shortlink random (hindari yang udah dipake hari ini)
     var todayStr = new Date().toISOString().slice(0, 10);
     var usedHistory = JSON.parse(localStorage.getItem('used_links_history') || '{}');
     if (usedHistory.date !== todayStr) {
@@ -239,16 +254,27 @@
       duration_ms: durationMs,
       is_active: true,
       hwid: "",
-      assigned_to: "Auto-Gen"
+      assigned_to: "Auto-Gen",
+      source: "web"
     };
 
-    db.ref('keys/' + newKey).set(payload).then(function() {
-      localStorage.setItem(USER_KEY_STORE, newKey);
-      localStorage.setItem(LAST_GEN_KEY, now.toString());
-      showActiveKey(newKey, DURATION_HOURS + " hours");
-    }).catch(function(err) {
-      statusInfo.textContent = "❌ Error: " + err.message;
-    });
+    function writeKey() {
+      db.ref('keys/' + newKey).set(payload).then(function() {
+        localStorage.setItem(USER_KEY_STORE, newKey);
+        localStorage.setItem(LAST_GEN_KEY, now.toString());
+        showActiveKey(newKey, DURATION_HOURS + " hours");
+      }).catch(function(err) {
+        statusInfo.textContent = "❌ Error: " + err.message;
+      });
+    }
+
+    if (auth.currentUser) {
+      writeKey();
+    } else {
+      auth.signInAnonymously().then(writeKey).catch(function(err) {
+        statusInfo.textContent = "❌ Auth error: " + err.message;
+      });
+    }
   }
 
   function showActiveKey(key, durationText) {
