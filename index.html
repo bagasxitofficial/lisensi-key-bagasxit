@@ -72,7 +72,7 @@
     .turnstile-box {
       background: #0F0B21; border: 1px solid #3B2D6B; border-radius: 14px;
       padding: 14px; margin-bottom: 16px; display: flex;
-      justify-content: center; align-items: center;
+      justify-content: center; align-items: center; min-height: 65px;
     }
     .footer {
       color: #4B4370; font-size: 10px; margin-top: 24px;
@@ -86,7 +86,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 </head>
 <body>
 
@@ -103,11 +103,7 @@
   </div>
 
   <div class="turnstile-box" id="turnstileBox">
-    <div class="cf-turnstile"
-         data-sitekey="0x4AAAAAAFAsYZ1gPgqGWh4q"
-         data-callback="onTurnstileSuccess"
-         data-theme="dark">
-    </div>
+    <div id="cf-turnstile-container"></div>
   </div>
 
   <button class="btn btn-primary" id="getBtn">CONTINUE →</button>
@@ -174,11 +170,36 @@
   var waBtn = document.getElementById('waBtn');
 
   var currentKey = "";
+  var turnstileWidgetId = null;
+  var currentStep = 1; // 1 = Verifikasi Awal, 2 = Verifikasi Akhir (Generate Key)
+
+  // Inisialisasi Cloudflare Turnstile Dinamis
+  window.onloadTurnstile = function() {
+    renderTurnstile();
+  };
+
+  function renderTurnstile() {
+    if (window.turnstile) {
+      turnstileWidgetId = turnstile.render('#cf-turnstile-container', {
+        sitekey: '0x4AAAAAAFAsYZ1gPgqGWh4q',
+        callback: onTurnstileSuccess,
+        theme: 'dark'
+      });
+    } else {
+      setTimeout(renderTurnstile, 500);
+    }
+  }
 
   function onTurnstileSuccess(token) {
-    turnstileBox.style.display = "none";
-    getBtn.style.display = "block";
-    statusInfo.textContent = "✅ Verification complete. Click CONTINUE to proceed.";
+    if (currentStep === 1) {
+      turnstileBox.style.display = "none";
+      getBtn.style.display = "block";
+      statusInfo.textContent = "✅ Initial verification complete. Click CONTINUE to proceed.";
+    } else if (currentStep === 2) {
+      turnstileBox.style.display = "none";
+      statusInfo.textContent = "✅ Final verification complete!";
+      handleGenerate();
+    }
   }
 
   function init() {
@@ -200,7 +221,15 @@
       if (window.history && window.history.replaceState) {
         window.history.replaceState({}, document.title, window.location.pathname);
       }
-      handleGenerate();
+      
+      // Tahap 2: Minta verifikasi Cloudflare sekali lagi sebelum rilis key
+      currentStep = 2;
+      turnstileBox.style.display = "flex";
+      getBtn.style.display = "none";
+      statusInfo.textContent = "🔒 Complete the final security check to reveal your key.";
+      if (window.turnstile && turnstileWidgetId !== null) {
+        turnstile.reset(turnstileWidgetId);
+      }
     } else {
       checkExistingKey();
     }
@@ -350,7 +379,6 @@
         reset_count: resetCount + 1,
         last_reset: now
       }).then(function() {
-        // Log
         db.ref('activity_logs').push({
           action: "Web Reset HWID: " + currentKey + " (reset #" + (resetCount + 1) + ")",
           timestamp: now
@@ -382,7 +410,9 @@
     });
   };
 
+  // Jalankan skrip awal
   init();
+  setTimeout(renderTurnstile, 1000);
 </script>
 </body>
 </html>
