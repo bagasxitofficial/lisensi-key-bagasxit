@@ -86,7 +86,8 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+  <!-- Perbaikan URL script Cloudflare Turnstile -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstile" async defer></script>
 </head>
 <body>
 
@@ -171,22 +172,21 @@
 
   var currentKey = "";
   var turnstileWidgetId = null;
-  var currentStep = 1; // 1 = Verifikasi Awal, 2 = Verifikasi Akhir (Generate Key)
+  var currentStep = 1;
 
-  // Inisialisasi Cloudflare Turnstile Dinamis
+  // Render Turnstile saat library Cloudflare siap
   window.onloadTurnstile = function() {
     renderTurnstile();
   };
 
   function renderTurnstile() {
-    if (window.turnstile) {
+    var container = document.getElementById('cf-turnstile-container');
+    if (window.turnstile && container && turnstileWidgetId === null) {
       turnstileWidgetId = turnstile.render('#cf-turnstile-container', {
         sitekey: '0x4AAAAAAFAsYZ1gPgqGWh4q',
         callback: onTurnstileSuccess,
         theme: 'dark'
       });
-    } else {
-      setTimeout(renderTurnstile, 500);
     }
   }
 
@@ -222,7 +222,6 @@
         window.history.replaceState({}, document.title, window.location.pathname);
       }
       
-      // Tahap 2: Minta verifikasi Cloudflare sekali lagi sebelum rilis key
       currentStep = 2;
       turnstileBox.style.display = "flex";
       getBtn.style.display = "none";
@@ -293,10 +292,11 @@
     var now = Date.now();
     var durationMs = DURATION_HOURS * 3600 * 1000;
 
+    // Perbaikan Objek Payload
     var payload = {
       key: newKey,
-      firebase.database.ServerValue.TIMESTAMP,
-      expires_at: Date.now() + durationMs,
+      created_at: firebase.database.ServerValue.TIMESTAMP,
+      expires_at: now + durationMs,
       duration_ms: durationMs,
       is_active: true,
       hwid: "",
@@ -331,7 +331,6 @@
     getBtn.style.display = "none";
     copyBtn.style.display = "block";
 
-    // Cek reset info
     db.ref('keys/' + key + '/reset_count').once('value').then(function(snap) {
       var count = snap.val() || 0;
       updateResetUI(key, count);
@@ -410,9 +409,8 @@
     });
   };
 
-  // Jalankan skrip awal
+  // Jalankan inisialisasi awal
   init();
-  setTimeout(renderTurnstile, 1000);
 </script>
 </body>
 </html>
