@@ -295,8 +295,8 @@
 
     var payload = {
       key: newKey,
-      created_at: now,
-      expires_at: now + durationMs,
+      firebase.database.ServerValue.TIMESTAMP,
+      expires_at: Date.now() + durationMs,
       duration_ms: durationMs,
       is_active: true,
       hwid: "",
