@@ -142,6 +142,15 @@
     console.error("Anonymous auth failed:", err);
   });
 
+  var SHORTLINK_URLS = [
+    'https://move2link.co/d6e38d7',
+    'https://move2link.co/74b15b4',
+    'https://move2link.co/8195428',
+    'https://move2link.co/afd0398',
+    'https://move2link.co/533d7d3',
+    'https://move2link.co/ff6341a'
+  ];
+
   var DURATION_HOURS = 5;
   var WAITING_KEY = 'bagasxit_waiting';
   var USER_KEY_STORE = 'bagasxit_user_key';
@@ -247,16 +256,30 @@
 
     localStorage.setItem(WAITING_KEY, Date.now().toString());
 
+    var todayStr = new Date().toISOString().slice(0, 10);
+    var usedHistory = JSON.parse(localStorage.getItem('used_links_history') || '{}');
+    if (usedHistory.date !== todayStr) usedHistory = { date: todayStr, links: [] };
+
+    var unusedLinks = SHORTLINK_URLS.filter(function(link) {
+      return !usedHistory.links.includes(link);
+    });
+
+    var targetUrl;
+    if (unusedLinks.length > 0) {
+      targetUrl = unusedLinks[Math.floor(Math.random() * unusedLinks.length)];
+    } else {
+      usedHistory.links = [];
+      targetUrl = SHORTLINK_URLS[Math.floor(Math.random() * SHORTLINK_URLS.length)];
+    }
+
+    usedHistory.links.push(targetUrl);
+    localStorage.setItem('used_links_history', JSON.stringify(usedHistory));
+
     statusInfo.textContent = "🔗 Redirecting to verification...";
 
-    fetch('/api/getlink')
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        window.location.href = data.url;
-      })
-      .catch(function() {
-        statusInfo.textContent = "❌ Server error. Coba lagi.";
-      });
+    setTimeout(function() {
+      window.location.href = targetUrl;
+    }, 500);
   };
 
   function handleGenerate() {
