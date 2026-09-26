@@ -86,7 +86,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-  <!-- Perbaikan URL script Cloudflare Turnstile -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstile" async defer></script>
 </head>
 <body>
@@ -110,7 +109,6 @@
   <button class="btn btn-primary" id="getBtn">CONTINUE →</button>
   <button class="btn btn-copy" id="copyBtn">📋 COPY KEY</button>
 
-  <!-- Reset HWID Section -->
   <div id="resetSection" class="hidden" style="margin-top:20px;">
     <div class="key-label" style="margin-bottom:10px;">RESET HWID (Max 2x)</div>
     <div class="key-timer" id="resetInfo">HWID reset available</div>
@@ -144,15 +142,6 @@
     console.error("Anonymous auth failed:", err);
   });
 
-  var SHORTLINK_URLS = [
-    'https://move2link.co/d6e38d7',
-    'https://move2link.co/74b15b4',
-    'https://move2link.co/8195428',
-    'https://move2link.co/afd0398',
-    'https://move2link.co/533d7d3',
-    'https://move2link.co/ff6341a'
-  ];
-
   var DURATION_HOURS = 5;
   var WAITING_KEY = 'bagasxit_waiting';
   var USER_KEY_STORE = 'bagasxit_user_key';
@@ -174,7 +163,6 @@
   var turnstileWidgetId = null;
   var currentStep = 1;
 
-  // Render Turnstile saat library Cloudflare siap
   window.onloadTurnstile = function() {
     renderTurnstile();
   };
@@ -259,30 +247,16 @@
 
     localStorage.setItem(WAITING_KEY, Date.now().toString());
 
-    var todayStr = new Date().toISOString().slice(0, 10);
-    var usedHistory = JSON.parse(localStorage.getItem('used_links_history') || '{}');
-    if (usedHistory.date !== todayStr) usedHistory = { date: todayStr, links: [] };
-
-    var unusedLinks = SHORTLINK_URLS.filter(function(link) {
-      return !usedHistory.links.includes(link);
-    });
-
-    var targetUrl;
-    if (unusedLinks.length > 0) {
-      targetUrl = unusedLinks[Math.floor(Math.random() * unusedLinks.length)];
-    } else {
-      usedHistory.links = [];
-      targetUrl = SHORTLINK_URLS[Math.floor(Math.random() * SHORTLINK_URLS.length)];
-    }
-
-    usedHistory.links.push(targetUrl);
-    localStorage.setItem('used_links_history', JSON.stringify(usedHistory));
-
     statusInfo.textContent = "🔗 Redirecting to verification...";
 
-    setTimeout(function() {
-      window.location.href = targetUrl;
-    }, 500);
+    fetch('/api/getlink')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        window.location.href = data.url;
+      })
+      .catch(function() {
+        statusInfo.textContent = "❌ Server error. Coba lagi.";
+      });
   };
 
   function handleGenerate() {
@@ -292,7 +266,6 @@
     var now = Date.now();
     var durationMs = DURATION_HOURS * 3600 * 1000;
 
-    // Perbaikan Objek Payload
     var payload = {
       key: newKey,
       created_at: firebase.database.ServerValue.TIMESTAMP,
@@ -409,7 +382,6 @@
     });
   };
 
-  // Jalankan inisialisasi awal
   init();
 </script>
 </body>
